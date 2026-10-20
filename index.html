@@ -13,6 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   
+  <!-- Firebase App & Firestore SDKs (ES Modules will be loaded via script module) -->
   <script>
     tailwind.config = {
       theme: {
@@ -69,7 +70,13 @@
           <h1 class="text-lg font-extrabold text-slate-900 tracking-tight flex items-center gap-1.5">
             이안이와 함께하는 제주 힐링 트립 
           </h1>
-          <p class="text-xs text-slate-500">2026.11.02(월) ~ 11.04(수) · 해비치 호텔</p>
+          <div class="flex items-center gap-2 mt-0.5">
+            <p class="text-xs text-slate-500">2026.11.02(월) ~ 11.04(수) · 해비치 호텔</p>
+            <span id="sync-status-badge" class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+              <span id="sync-status-text">동기화 연결 중</span>
+            </span>
+          </div>
         </div>
       </div>
       <!-- D-day & Quick Info -->
@@ -153,9 +160,8 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <span class="w-7 h-7 bg-orange-500 text-white rounded-lg flex items-center justify-center font-bold text-sm shadow-sm">1</span>
-            <h3 class="font-bold text-slate-800 text-base">11월 2일 (월) : 입도 & 해비치 체크인</h3>
+            <h3 class="font-bold text-slate-800 text-base">11월 2일 (월)</h3>
           </div>
-          <span class="text-xs text-slate-500 font-medium">공항 → 제주시 → 표선</span>
         </div>
 
         <div class="relative pl-6 border-l-2 border-orange-200 space-y-4 ml-3" id="day-list-1">
@@ -277,9 +283,8 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <span class="w-7 h-7 bg-sky-600 text-white rounded-lg flex items-center justify-center font-bold text-sm shadow-sm">2</span>
-            <h3 class="font-bold text-slate-800 text-base">11월 3일 (화) : 지인 식당 '로티' & 호캉스</h3>
+            <h3 class="font-bold text-slate-800 text-base">11월 3일 (화)</h3>
           </div>
-          <span class="text-xs text-slate-500 font-medium">송당리 → 해비치 인프라</span>
         </div>
 
         <div class="relative pl-6 border-l-2 border-sky-200 space-y-4 ml-3" id="day-list-2">
@@ -346,9 +351,8 @@
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <span class="w-7 h-7 bg-emerald-600 text-white rounded-lg flex items-center justify-center font-bold text-sm shadow-sm">3</span>
-            <h3 class="font-bold text-slate-800 text-base">11월 4일 (수) : 체크아웃 & 복귀</h3>
+            <h3 class="font-bold text-slate-800 text-base">11월 4일 (수)</h3>
           </div>
-          <span class="text-xs text-slate-500 font-medium">표선 → 렌터카 반납 → 공항</span>
         </div>
 
         <div class="relative pl-6 border-l-2 border-emerald-200 space-y-4 ml-3" id="day-list-3">
@@ -794,7 +798,7 @@
     <div class="fixed bottom-0 max-w-xl w-full bg-white/95 backdrop-blur border-t border-slate-200 px-5 py-3 flex items-center justify-between text-xs z-30">
       <div class="flex items-center gap-2">
         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        <span class="text-slate-600 font-medium">제주 가족 여행 가이드</span>
+        <span class="text-slate-600 font-medium">제주 가족 여행 가이드 · 4인 실시간 공유</span>
       </div>
       <div class="flex items-center gap-2">
         <button onclick="sharePlan()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg flex items-center gap-1 transition">
@@ -808,8 +812,36 @@
 
   </div>
 
-    <script>
-    // --- STATE MANAGEMENT & LOCAL STORAGE ---
+  <!-- Firebase & Application Script (Single-File ESM) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // --- FIREBASE CONFIGURATION ---
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'jeju-ian-trip-2026';
+    let firebaseConfig = {
+      apiKey: "AIzaSyDummyKeyForFallbackOfflineMode123",
+      authDomain: "jeju-trip-ian.firebaseapp.com",
+      projectId: "jeju-trip-ian",
+      storageBucket: "jeju-trip-ian.appspot.com",
+      messagingSenderId: "1234567890",
+      appId: "1:1234567890:web:abcdef123456"
+    };
+
+    if (typeof __firebase_config !== 'undefined') {
+      try {
+        firebaseConfig = JSON.parse(__firebase_config);
+      } catch (e) {
+        console.warn("Using default firebaseConfig:", e);
+      }
+    }
+
+    let app, auth, db;
+    let currentUser = null;
+    let isCloudSynced = false;
+
+    // Local Storage Keys as Instant Cache & Fallback
     const STORAGE_KEY_CHECKLIST = 'jeju_baby_checklist_v2';
     const STORAGE_KEY_CUSTOM_EVENTS = 'jeju_baby_custom_events_v2';
     const STORAGE_KEY_RECOMMENDATIONS = 'jeju_baby_live_recs_v1';
@@ -827,8 +859,6 @@
       { id: 'p7', text: "월정리 해변 카페거리", query: "월정리해수욕장", region: "동북부 (구좌)", checked: false },
       { id: 'p8', text: "명진전복 (구좌 전복돌솥밥/구이)", query: "구좌 명진전복", region: "동북부 (구좌)", checked: false }
     ];
-
-    let pendingItems = [];
 
     // Default Checklists
     const defaultChecklists = [
@@ -875,38 +905,145 @@
       }
     ];
 
+    let pendingItems = [];
     let checklistData = [];
     let customEvents = [];
 
-    // --- INITIALIZATION ---
-    window.addEventListener('DOMContentLoaded', () => {
-      loadPendingItems();
-      loadChecklist();
-      loadCustomEvents();
-      loadSavedRecommendations();
-      loadSavedTip();
-    });
+    function getTripDocRef() {
+      // RULE 1: Strict public shared path for the 4 travelers
+      return doc(db, 'artifacts', appId, 'public', 'data', 'shared_trip_state', 'trip_data');
+    }
 
-    // --- PENDING / TBD SCHEDULES LOGIC ---
-    function loadPendingItems() {
-      const stored = localStorage.getItem(STORAGE_KEY_PENDING_SCHEDULES);
-      if (stored) {
-        try {
-          pendingItems = JSON.parse(stored);
-        } catch(e) {
-          pendingItems = defaultPendingItems;
+    // Update status badge UI
+    function updateSyncUI(status, label) {
+      const badge = document.getElementById('sync-status-badge');
+      const text = document.getElementById('sync-status-text');
+      if (!badge || !text) return;
+
+      if (status === 'synced') {
+        badge.className = 'inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200';
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span><span>${label || '4인 실시간 동기화 중'}</span>`;
+      } else if (status === 'syncing') {
+        badge.className = 'inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200';
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-sky-500 animate-ping"></span><span>${label || '클라우드 저장 중...'}</span>`;
+      } else {
+        badge.className = 'inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200';
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span><span>${label || '로컬 모드 (오프라인)'}</span>`;
+      }
+    }
+
+    // Save all collaborative data to Firebase Firestore
+    async function syncToCloud() {
+      if (!currentUser || !db) return;
+      try {
+        updateSyncUI('syncing', '동기화 중...');
+        const docRef = getTripDocRef();
+        await setDoc(docRef, {
+          pendingItems: JSON.stringify(pendingItems),
+          checklistData: JSON.stringify(checklistData),
+          customEvents: JSON.stringify(customEvents),
+          lastUpdated: Date.now(),
+          updatedBy: currentUser.uid
+        }, { merge: true });
+        updateSyncUI('synced', '4인 실시간 동기화 중');
+      } catch (err) {
+        console.warn('Sync to cloud error (falling back to local):', err);
+        updateSyncUI('local', '로컬 저장 모드');
+      }
+    }
+
+    // Setup Realtime Listener for 4 Travelers
+    function setupCloudListener() {
+      if (!currentUser || !db) return;
+      const docRef = getTripDocRef();
+
+      onSnapshot(docRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.pendingItems) {
+            try { pendingItems = JSON.parse(data.pendingItems); } catch(e){}
+            renderPendingItems();
+          }
+          if (data.checklistData) {
+            try { checklistData = JSON.parse(data.checklistData); } catch(e){}
+            renderChecklist();
+          }
+          if (data.customEvents) {
+            try { customEvents = JSON.parse(data.customEvents); } catch(e){}
+            renderCustomEvents();
+          }
+          isCloudSynced = true;
+          updateSyncUI('synced', '4인 실시간 동기화 됨');
+        } else {
+          // Initial setup: upload initial seed data to cloud
+          syncToCloud();
         }
+      }, (error) => {
+        console.warn('Realtime sync listener warning:', error);
+        updateSyncUI('local', '로컬 저장 모드');
+      });
+    }
+
+    async function initFirebaseAndState() {
+      // 1. First load local memory for instantaneous UI rendering
+      loadLocalState();
+
+      // 2. Initialize Firebase
+      try {
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+
+        // RULE 3: Call signInWithCustomToken or signInAnonymously FIRST
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+
+        currentUser = auth.currentUser;
+        if (currentUser) {
+          updateSyncUI('synced', '4인 실시간 동기화 준비됨');
+          setupCloudListener();
+        }
+      } catch (err) {
+        console.warn('Firebase init fallback to local storage:', err);
+        updateSyncUI('local', '로컬 저장 모드');
+      }
+    }
+
+    function loadLocalState() {
+      // Pending Items
+      const savedPending = localStorage.getItem(STORAGE_KEY_PENDING_SCHEDULES);
+      if (savedPending) {
+        try { pendingItems = JSON.parse(savedPending); } catch(e) { pendingItems = defaultPendingItems; }
       } else {
         pendingItems = defaultPendingItems;
       }
       renderPendingItems();
+
+      // Checklist
+      const savedCheck = localStorage.getItem(STORAGE_KEY_CHECKLIST);
+      if (savedCheck) {
+        try { checklistData = JSON.parse(savedCheck); } catch(e) { checklistData = defaultChecklists; }
+      } else {
+        checklistData = defaultChecklists;
+      }
+      renderChecklist();
+
+      // Custom Events
+      const savedEvents = localStorage.getItem(STORAGE_KEY_CUSTOM_EVENTS);
+      if (savedEvents) {
+        try { customEvents = JSON.parse(savedEvents); } catch(e) { customEvents = []; }
+      }
+      renderCustomEvents();
+
+      // Tips & Recommendations
+      loadSavedRecommendations();
+      loadSavedTip();
     }
 
-    function savePendingItems() {
-      localStorage.setItem(STORAGE_KEY_PENDING_SCHEDULES, JSON.stringify(pendingItems));
-      renderPendingItems();
-    }
-
+    // --- PENDING / TBD SCHEDULES LOGIC ---
     function renderPendingItems() {
       const container = document.getElementById('pending-list-container');
       const badge = document.getElementById('pending-count-badge');
@@ -938,7 +1075,7 @@
 
         row.innerHTML = `
           <label class="flex items-center gap-2.5 flex-1 cursor-pointer select-none min-w-0">
-            <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="togglePendingItem('${item.id}')" class="w-3.5 h-3.5 text-amber-600 rounded border-amber-300 focus:ring-amber-500 shrink-0">
+            <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="window.togglePendingItem('${item.id}')" class="w-3.5 h-3.5 text-amber-600 rounded border-amber-300 focus:ring-amber-500 shrink-0">
             <div class="flex items-center gap-1.5 flex-wrap">
               ${regionBadge}
               <span class="text-xs text-slate-800 leading-snug break-all ${item.checked ? 'line-through text-slate-400' : 'font-medium'}">
@@ -950,7 +1087,7 @@
             <a href="https://map.naver.com/p/search/${encodeURIComponent(mapQuery)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[10px] font-semibold bg-[#03C75A] text-white hover:bg-emerald-600 px-2 py-1 rounded-md shadow-2xs transition" title="네이버 지도에서 보기">
               <i class="fa-solid fa-map-pin"></i> 지도
             </a>
-            <button onclick="deletePendingItem('${item.id}')" class="text-slate-300 hover:text-rose-500 p-1 text-xs" title="삭제">
+            <button onclick="window.deletePendingItem('${item.id}')" class="text-slate-300 hover:text-rose-500 p-1 text-xs" title="삭제">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
@@ -963,7 +1100,9 @@
       const item = pendingItems.find(p => p.id === id);
       if (item) {
         item.checked = !item.checked;
-        savePendingItems();
+        localStorage.setItem(STORAGE_KEY_PENDING_SCHEDULES, JSON.stringify(pendingItems));
+        renderPendingItems();
+        syncToCloud();
       }
     }
 
@@ -980,13 +1119,17 @@
         checked: false
       });
       input.value = '';
-      savePendingItems();
-      showToast('미정 일정이 등록되었습니다.');
+      localStorage.setItem(STORAGE_KEY_PENDING_SCHEDULES, JSON.stringify(pendingItems));
+      renderPendingItems();
+      syncToCloud();
+      showToast('미정 일정이 등록되어 4인에게 공유되었습니다.');
     }
 
     function deletePendingItem(id) {
       pendingItems = pendingItems.filter(p => p.id !== id);
-      savePendingItems();
+      localStorage.setItem(STORAGE_KEY_PENDING_SCHEDULES, JSON.stringify(pendingItems));
+      renderPendingItems();
+      syncToCloud();
       showToast('항목이 삭제되었습니다.');
     }
 
@@ -1011,7 +1154,7 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // --- REALTIME TRAVEL TIPS LOGIC ---
+    // --- REALTIME TRAVEL TIPS ---
     const localTipPool = [
       "11월 제주 표선 해안은 낮 햇살은 온화하지만 해풍이 불면 체감 온도가 낮아집니다. 가벼운 패딩이나 가디건을 레이어드하고 유모차 방풍 커버를 꼭 챙기세요.",
       "김포공항 및 제주공항 출발/도착 시 유아 동반 승객은 교통약자 우대통로(패스트트랙)를 이용할 수 있어 대기 시간을 크게 줄일 수 있습니다.",
@@ -1115,7 +1258,7 @@
       }, 2000);
     }
 
-    // --- CUSTOM SCHEDULE MODAL & LOCAL STORAGE ---
+    // --- CUSTOM SCHEDULE MODAL & SYNC ---
     function openAddModal(day = 1) {
       document.getElementById('modal-day').value = day;
       document.getElementById('modal-time').value = '';
@@ -1154,25 +1297,15 @@
       localStorage.setItem(STORAGE_KEY_CUSTOM_EVENTS, JSON.stringify(customEvents));
       renderCustomEvents();
       closeAddModal();
-      showToast('새 일정이 등록되었습니다!');
-    }
-
-    function loadCustomEvents() {
-      const stored = localStorage.getItem(STORAGE_KEY_CUSTOM_EVENTS);
-      if (stored) {
-        try {
-          customEvents = JSON.parse(stored);
-        } catch(e) {
-          customEvents = [];
-        }
-      }
-      renderCustomEvents();
+      syncToCloud();
+      showToast('새 일정이 추가되어 4인에게 실시간 공유되었습니다!');
     }
 
     function deleteCustomEvent(eventId) {
       customEvents = customEvents.filter(e => e.id !== eventId);
       localStorage.setItem(STORAGE_KEY_CUSTOM_EVENTS, JSON.stringify(customEvents));
       renderCustomEvents();
+      syncToCloud();
       showToast('일정이 삭제되었습니다.');
     }
 
@@ -1202,13 +1335,13 @@
               <div>
                 <div class="flex items-center gap-1.5">
                   <span class="text-xs font-bold text-violet-700 bg-violet-100 px-2 py-0.5 rounded">${item.time}</span>
-                  <span class="text-[10px] font-bold px-1.5 py-0.5 bg-violet-600 text-white rounded">직접 추가한 일정</span>
+                  <span class="text-[10px] font-bold px-1.5 py-0.5 bg-violet-600 text-white rounded">공유 일정</span>
                 </div>
                 <h4 class="font-bold text-slate-900 text-sm mt-1">${item.title}</h4>
               </div>
               <div class="flex items-center gap-1.5">
                 ${mapBtn}
-                <button onclick="deleteCustomEvent('${item.id}')" class="text-slate-400 hover:text-rose-500 p-1 text-xs">
+                <button onclick="window.deleteCustomEvent('${item.id}')" class="text-slate-400 hover:text-rose-500 p-1 text-xs">
                   <i class="fa-solid fa-trash-can"></i>
                 </button>
               </div>
@@ -1221,28 +1354,10 @@
       });
     }
 
-    // --- CHECKLIST LOGIC ---
-    function loadChecklist() {
-      const stored = localStorage.getItem(STORAGE_KEY_CHECKLIST);
-      if (stored) {
-        try {
-          checklistData = JSON.parse(stored);
-        } catch(e) {
-          checklistData = defaultChecklists;
-        }
-      } else {
-        checklistData = defaultChecklists;
-      }
-      renderChecklist();
-    }
-
-    function saveChecklist() {
-      localStorage.setItem(STORAGE_KEY_CHECKLIST, JSON.stringify(checklistData));
-      updateChecklistProgress();
-    }
-
+    // --- CHECKLIST LOGIC & SYNC ---
     function renderChecklist() {
       const container = document.getElementById('checklist-container');
+      if (!container) return;
       container.innerHTML = '';
 
       checklistData.forEach(cat => {
@@ -1253,7 +1368,7 @@
         cat.items.forEach(item => {
           itemsHtml += `
             <label class="flex items-start gap-3 p-2 rounded-xl hover:bg-slate-50 cursor-pointer transition select-none">
-              <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleCheckItem('${cat.id}', '${item.id}')" class="mt-0.5 w-4 h-4 text-orange-600 rounded border-slate-300 focus:ring-orange-500">
+              <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="window.toggleCheckItem('${cat.id}', '${item.id}')" class="mt-0.5 w-4 h-4 text-orange-600 rounded border-slate-300 focus:ring-orange-500">
               <span class="text-xs text-slate-700 leading-snug flex-1 ${item.checked ? 'line-through text-slate-400' : ''}">
                 ${item.text}
               </span>
@@ -1282,8 +1397,9 @@
         const item = category.items.find(i => i.id === itemId);
         if (item) {
           item.checked = !item.checked;
-          saveChecklist();
+          localStorage.setItem(STORAGE_KEY_CHECKLIST, JSON.stringify(checklistData));
           renderChecklist();
+          syncToCloud();
         }
       }
     }
@@ -1300,8 +1416,8 @@
       const pct = total === 0 ? 0 : Math.round((checked / total) * 100);
       const bar = document.getElementById('checklist-progress-bar');
       const text = document.getElementById('checklist-progress-text');
-      bar.style.width = pct + '%';
-      text.textContent = `${pct}% (${checked}/${total})`;
+      if (bar) bar.style.width = pct + '%';
+      if (text) text.textContent = `${pct}% (${checked}/${total})`;
     }
 
     function addCustomCheckItem() {
@@ -1324,22 +1440,21 @@
           text: text,
           checked: false
         });
-        saveChecklist();
+        localStorage.setItem(STORAGE_KEY_CHECKLIST, JSON.stringify(checklistData));
         renderChecklist();
+        syncToCloud();
         input.value = '';
-        showToast('준비물이 추가되었습니다.');
+        showToast('준비물이 추가되어 모두에게 공유되었습니다.');
       }
     }
 
     function resetChecklist() {
       checklistData = JSON.parse(JSON.stringify(defaultChecklists));
-      saveChecklist();
+      localStorage.setItem(STORAGE_KEY_CHECKLIST, JSON.stringify(checklistData));
       renderChecklist();
+      syncToCloud();
       showToast('체크리스트가 초기화되었습니다.');
     }
-
-    // --- REALTIME RECOMMENDATIONS VIA GEMINI API ---
-    let isFetchingRecs = false;
 
     const backupRecommendationSets = [
       {
@@ -1350,29 +1465,16 @@
           { tag: "성산 뷰 명소", title: "광치기해변 유모차 산책로", query: "광치기해변", desc: "성산일출봉을 배경으로 인생 가족사진을 남기기 좋은 곳. 모래사장 진입 전 도로변 데크길에서 유모차로 편안하게 감상할 수 있습니다." }
         ],
         foods: [
-          { tag: "표선 로컬 맛집", title: "표선 칼국수 (보말보말)", query: "표선칼국수", desc: "해비치 호텔 인근의 진한 보말보말죽과 고로케 맛집. 식당 내부가 청결하여 온 가족이 여유롭게 식사할 수 있습니다." },
+          { tag: "표선 로컬 맛집", title: "표선 칼국수 (보말보말)", query: "표선칼국수", desc: "해비치 호텔 인근의 진한 보말죽과 칼국수 맛집. 식당 내부가 청결하여 온 가족이 여유롭게 식사할 수 있습니다." },
           { tag: "송당리 감성 카페", title: "풍림다방 송당점", query: "풍림다방 송당점", desc: "식당 '로티' 방문 후 티타임 추천. 정성 어린 핸드드립과 시그니처 브레붸 커피를 감미롭게 즐기며 쉬어가기 좋은 공간입니다." },
           { tag: "성산 은갈치 맛집", title: "맛나식당 (갈치조림)", query: "성산 맛나식당", desc: "성산의 대표 갈치조림 노포. 부드러운 갈치살과 매콤달콤한 무 조림으로 성인 4인의 입맛을 사로잡는 가성비 명소입니다." },
           { tag: "포장/야식 추천", title: "동문시장 야시장 딱새우회 포장", query: "동문시장 야시장", desc: "해비치 호텔 객실에서 직접 만든 고등어회와 함께 즐기기 좋은 신선한 딱새우회와 전복버터구이 포장 세트입니다." }
-        ]
-      },
-      {
-        spots: [
-          { tag: "비 오는 날 대비", title: "빛의 벙커 (성산)", query: "빛의 벙커", desc: "옛 군사시설을 개조한 몰입형 미디어아트 전시관. 전 구역이 휠체어/유모차 턱 없이 완만하며 시원하고 쾌적한 실내 온도를 유지합니다." },
-          { tag: "피톤치드 숲길", title: "사려니숲길 (남조로 붉은오름 입구)", query: "사려니숲길 붉은오름입구", desc: "무장애 데크 나눔길이 약 1.5km 조성되어 있어 유모차로도 울창한 삼나무 숲길 안쪽까지 안전하고 편안하게 진입할 수 있습니다." },
-          { tag: "해비치 정원", title: "해비치 리조트 오션가든 산책", query: "해비치호텔앤드리조트 제주", desc: "외출 없이 호텔 부지 내 드넓은 잔디밭과 야외 수영장 주변을 유모차로 한가롭게 거닐며 100일 스냅 사진을 찍기에 최적입니다." },
-          { tag: "조천/함덕 코스", title: "함덕 서우봉 둘레길 초입", query: "함덕 서우봉", desc: "에메랄드빛 바다가 펼쳐지는 완만한 해안 산책로. 갓난아기에게 부담 없는 짧은 힐링 산책 코스로 좋습니다." }
-        ],
-        foods: [
-          { tag: "표선 흑돼지 전문", title: "돈경 백정돈가스 & 흑돼지", query: "표선 흑돼지", desc: "해비치 호텔에서 차로 3분 거리. 환기 시설이 쾌적하고 고기를 직접 구워주어 100일 아기와 함께 방문해도 부담이 적습니다." },
-          { tag: "구좌/송당 별미", title: "도토리키친 (청귤소바)", query: "도토리키친", desc: "상큼하고 청량한 제주의 청귤 쯔유 소바로 유명한 맛집. 깔끔한 인테리어와 정갈한 1인 트레이 서빙으로 성인 4명 식사에 안성맞춤입니다." },
-          { tag: "아침/해장 추천", title: "표선 광어미역국 전문점", query: "표선 미역국", desc: "자극적이지 않고 담백하게 끓여낸 뽀얀 광어 미역국과 성게미역국으로 편안하게 속을 달래기 좋은 아침 식사 장소입니다." },
-          { tag: "제주 베이커리", title: "아베베 베이커리 (크림빵)", query: "아베베베이커리 제주", desc: "제주 로컬 재료(우도땅콩, 오메기떡 등)를 가득 채운 유명 베이커리. 1일차 제과점 도라지 방문 후 추가 포장 간식으로 추천합니다." }
         ]
       }
     ];
 
     let currentBackupIndex = 0;
+    let isFetchingRecs = false;
 
     async function fetchLiveRecommendations() {
       if (isFetchingRecs) return;
@@ -1401,10 +1503,10 @@
 반드시 다음 JSON 구조로만 반환해주세요:
 {
   "spots": [
-    { "tag": "지역 또는 특징 (예: 표선 인근)", "title": "장소 이름", "query": "네이버 지도 검색용 정확한 장소명", "desc": "100일 아기 및 성인 4인 관점의 추천 이유 (2~3문장)" }
+    { "tag": "지역 또는 특징", "title": "장소 이름", "query": "네이버 지도 검색용 정확한 장소명", "desc": "추천 이유 (2문장)" }
   ],
   "foods": [
-    { "tag": "특징 (예: 송당 맛집)", "title": "음식점 또는 메뉴명", "query": "네이버 지도 검색용 장소명", "desc": "성인 4인 및 아기 동반 관점의 추천 이유 (2~3문장)" }
+    { "tag": "특징", "title": "음식점 또는 메뉴명", "query": "네이버 지도 검색용 장소명", "desc": "추천 이유 (2문장)" }
   ]
 }
 `;
@@ -1418,17 +1520,13 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              responseMimeType: "application/json"
-            }
+            generationConfig: { responseMimeType: "application/json" }
           })
         });
 
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         const jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (!jsonText) throw new Error("No payload from AI");
-
         const parsedData = JSON.parse(jsonText);
         if (parsedData.spots && parsedData.foods) {
           applyRecommendations(parsedData, true);
@@ -1437,11 +1535,10 @@
           throw new Error("Invalid format");
         }
       } catch (err) {
-        console.warn('Live API request failed or rate limited, applying smart fallback:', err);
         const fallback = backupRecommendationSets[currentBackupIndex % backupRecommendationSets.length];
         currentBackupIndex++;
         applyRecommendations(fallback, false);
-        showToast('새로운 추천 리스트로 새로고침되었습니다!');
+        showToast('새로운 추천 리스트로 갱신되었습니다!');
       } finally {
         isFetchingRecs = false;
         icon.classList.remove('fa-spin');
@@ -1479,12 +1576,10 @@
             const bannerMsg = document.getElementById('ai-status-msg');
             const bannerTime = document.getElementById('ai-updated-time');
             banner.classList.remove('hidden');
-            bannerMsg.innerHTML = `<i class="fa-solid fa-sparkles text-emerald-600"></i> 실시간 맞춤 추천 리스트가 활성화되어 있습니다.`;
+            bannerMsg.innerHTML = `<i class="fa-solid fa-sparkles text-emerald-600"></i> 맞춤 추천 리스트가 활성화되어 있습니다.`;
             bannerTime.textContent = `최근 갱신: ${parsed.updatedAt || ''}`;
           }
-        } catch(e) {
-          console.error(e);
-        }
+        } catch(e) {}
       }
     }
 
@@ -1540,7 +1635,7 @@
       const url = window.location.href;
       if (navigator.clipboard) {
         navigator.clipboard.writeText(url).then(() => {
-          showToast('페이지 링크가 복사되었습니다!');
+          showToast('페이지 링크가 복사되었습니다! 가족들에게 공유하세요.');
         }).catch(() => {
           copyFallback(url);
         });
@@ -1556,8 +1651,28 @@
       temp.select();
       document.execCommand('copy');
       document.body.removeChild(temp);
-      showToast('페이지 링크가 복사되었습니다!');
+      showToast('페이지 링크가 복사되었습니다! 가족들에게 공유하세요.');
     }
+
+    // Expose functions globally to window for HTML inline event handlers
+    window.switchTab = switchTab;
+    window.filterDay = filterDay;
+    window.openAddModal = openAddModal;
+    window.closeAddModal = closeAddModal;
+    window.saveNewSchedule = saveNewSchedule;
+    window.deleteCustomEvent = deleteCustomEvent;
+    window.toggleCheckItem = toggleCheckItem;
+    window.addCustomCheckItem = addCustomCheckItem;
+    window.resetChecklist = resetChecklist;
+    window.togglePendingItem = togglePendingItem;
+    window.addPendingItem = addPendingItem;
+    window.deletePendingItem = deletePendingItem;
+    window.fetchLiveTip = fetchLiveTip;
+    window.fetchLiveRecommendations = fetchLiveRecommendations;
+    window.sharePlan = sharePlan;
+
+    // Run initialization
+    initFirebaseAndState();
   </script>
 </body>
 </html>
