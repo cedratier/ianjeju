@@ -233,308 +233,83 @@
 
     </main>
 
-    <!-- TAB 2: CHECKLIST (준비물 체크리스트) -->
-    <main id="tab-content-checklist" class="hidden flex-1 p-5 space-y-5">
-      
-      <!-- Progress Bar -->
-      <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
-        <div class="flex justify-between items-center mb-2">
-          <span class="text-xs font-bold text-slate-700">짐 챙기기 달성률</span>
-          <span id="checklist-progress-text" class="text-xs font-bold text-orange-600">0% (0/0)</span>
-        </div>
-        <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
-          <div id="checklist-progress-bar" class="bg-orange-500 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
-        </div>
-        <div class="mt-3 flex justify-between items-center text-xs">
-          <button onclick="resetChecklist()" class="text-slate-400 hover:text-rose-500 transition">
-            <i class="fa-solid fa-rotate-left"></i> 전체 초기화
-          </button>
-          <span class="text-slate-400">자동 저장 중</span>
-        </div>
-      </div>
-
-      <!-- Add Custom Item Form -->
-      <div class="bg-white border border-slate-200 rounded-2xl p-3 flex gap-2">
-        <input type="text" id="custom-check-input" placeholder="새로운 준비물 추가하기..." class="flex-1 text-xs border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-orange-500">
-        <select id="custom-check-category" class="text-xs border border-slate-200 rounded-xl px-2 py-2 text-slate-600 bg-white">
-          <option value="baby">아기 필수품</option>
-          <option value="adult">성인 4인</option>
-          <option value="docs">신분증/예약</option>
-        </select>
-        <button onclick="addCustomCheckItem()" class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded-xl text-xs font-bold">
-          추가
-        </button>
-      </div>
-
-      <!-- Check Categories -->
-      <div class="space-y-4" id="checklist-container">
-        <!-- Rendered dynamically via JS -->
-      </div>
-    </main>
-
-    <!-- TAB 3: RECOMMEND (추천 명소 & 맛집) -->
-    <main id="tab-content-recommend" class="hidden flex-1 p-5 space-y-6">
-
-      <!-- Intro Card with Realtime Refresh Button -->
-      <div class="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl p-4 text-white shadow-md">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <i class="fa-solid fa-lightbulb text-amber-300"></i>
-            <span class="text-xs font-bold uppercase tracking-wider text-emerald-100">Carefully Curated</span>
+    <!-- Modal for Promoting Pending Item to Schedule -->
+    <div id="promote-pending-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+      <div class="bg-white rounded-2xl w-full max-w-sm p-5 space-y-4 shadow-xl">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+          <div class="flex items-center gap-1.5">
+            <span class="p-1 bg-orange-100 text-orange-600 rounded-lg text-xs">
+              <i class="fa-solid fa-calendar-plus"></i>
+            </span>
+            <h3 class="font-bold text-sm text-slate-900">미정 일정 등록하기</h3>
           </div>
-          <button id="refresh-recommend-btn" onclick="fetchLiveRecommendations()" class="inline-flex items-center gap-1.5 bg-white/20 hover:bg-white/30 active:scale-95 text-white text-xs font-bold px-3 py-1.5 rounded-xl border border-white/30 backdrop-blur-xs transition shadow-xs">
-            <i id="refresh-icon" class="fa-solid fa-arrows-rotate"></i>
-            <span>실시간 새로고침</span>
+          <button onclick="closePromoteModal()" class="text-slate-400 hover:text-slate-600 text-lg">
+            <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
-        <h3 class="text-base font-bold mt-2">100일 아기 동반 맞춤 추천 명소 & 먹거리</h3>
-        <p class="text-xs text-emerald-100 mt-1 leading-relaxed">
-          유모차 진입이 수월한 평지 산책로와 성인 4명이 쾌적하게 즐길 수 있는 제주 로컬 미식을 엄선했습니다.
-        </p>
-      </div>
 
-      <!-- Realtime Status Banner -->
-      <div id="ai-status-banner" class="hidden text-xs py-2 px-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-between">
-        <span id="ai-status-msg" class="flex items-center gap-2">
-          <i class="fa-solid fa-sparkles text-emerald-600"></i>
-          AI가 아기 동반에 최적화된 새로운 장소를 추천 중입니다...
-        </span>
-        <span id="ai-updated-time" class="text-[10px] text-emerald-600 font-semibold"></span>
-      </div>
+        <div class="space-y-3 text-xs">
+          <!-- Item preview -->
+          <div class="bg-amber-50/70 border border-amber-200/80 p-2.5 rounded-xl">
+            <span class="text-[10px] text-amber-700 font-bold block mb-0.5">선택한 미정 일정</span>
+            <p id="promote-item-title" class="font-bold text-slate-900 text-xs break-keep"></p>
+            <input type="hidden" id="promote-item-id">
+            <input type="hidden" id="promote-item-query">
+          </div>
 
-      <!-- 1. 추천 명소 (유모차 친화 & 호텔 인근) -->
-      <div class="space-y-3">
-        <div class="flex items-center justify-between">
-          <h4 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
-            <i class="fa-solid fa-tree text-emerald-600"></i>
-            <span>유모차 산책 & 힐링 추천 명소</span>
-          </h4>
-          <span class="text-[11px] text-slate-400 font-medium">평지·실내 위주</span>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">어느 날짜로 옮길까요?</label>
+            <select id="promote-day" class="w-full border border-slate-200 rounded-xl p-2.5 bg-white font-medium">
+              <option value="1">1일차 (11월 2일 월)</option>
+              <option value="2">2일차 (11월 3일 화)</option>
+              <option value="3">3일차 (11월 4일 수)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">시간 설정 (시간순 자동 정렬)</label>
+            <div class="flex gap-2">
+              <select id="promote-period" class="w-1/3 border border-slate-200 rounded-xl p-2.5 bg-white font-medium">
+                <option value="AM">오전</option>
+                <option value="PM" selected>오후</option>
+              </select>
+              <select id="promote-hour" class="w-1/3 border border-slate-200 rounded-xl p-2.5 bg-white font-medium">
+                <option value="01">1시</option>
+                <option value="02">2시</option>
+                <option value="03">3시</option>
+                <option value="04">4시</option>
+                <option value="05">5시</option>
+                <option value="06">6시</option>
+                <option value="07">7시</option>
+                <option value="08">8시</option>
+                <option value="09">9시</option>
+                <option value="10">10시</option>
+                <option value="11">11시</option>
+                <option value="12" selected>12시</option>
+              </select>
+              <select id="promote-minute" class="w-1/3 border border-slate-200 rounded-xl p-2.5 bg-white font-medium">
+                <option value="00" selected>00분</option>
+                <option value="10">10분</option>
+                <option value="20">20분</option>
+                <option value="30">30분</option>
+                <option value="40">40분</option>
+                <option value="50">50분</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">메모 (선택)</label>
+            <textarea id="promote-desc" rows="2" placeholder="가족들과 공유할 메모를 적어보세요..." class="w-full border border-slate-200 rounded-xl p-2.5 outline-none focus:border-orange-500 resize-none"></textarea>
+          </div>
         </div>
 
-        <div id="recommend-spots-container" class="space-y-2.5">
-          <!-- Place 1: 표선 해안도로 & 백사장 -->
-          <div class="bg-white border border-slate-200 p-3.5 rounded-xl shadow-xs">
-            <div class="flex justify-between items-start">
-              <div>
-                <span class="text-[10px] font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded">호텔 바로 앞 (도보 가능)</span>
-                <h5 class="font-bold text-slate-900 text-sm mt-1">표선해수욕장 & 해안 데크 산책로</h5>
-              </div>
-              <a href="https://map.naver.com/p/search/표선해수욕장" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-semibold bg-[#03C75A] text-white hover:bg-emerald-600 px-2.5 py-1 rounded-md shadow-xs">
-                <i class="fa-solid fa-map-pin"></i> 지도
-              </a>
-            </div>
-            <p class="text-xs text-slate-600 mt-1">해비치 호텔 정문과 바로 연결되는 완만한 데크길. 썰물 때 끝없이 펼쳐지는 백사장을 유모차로 편하게 조망할 수 있습니다.</p>
-          </div>
-
-          <!-- Place 2: 비자림 -->
-          <div class="bg-white border border-slate-200 p-3.5 rounded-xl shadow-xs">
-            <div class="flex justify-between items-start">
-              <div>
-                <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">송당/구좌 (로티와 인접)</span>
-                <h5 class="font-bold text-slate-900 text-sm mt-1">비자림 (천년의 숲)</h5>
-              </div>
-              <a href="https://map.naver.com/p/search/비자림" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-semibold bg-[#03C75A] text-white hover:bg-emerald-600 px-2.5 py-1 rounded-md shadow-xs">
-                <i class="fa-solid fa-map-pin"></i> 지도
-              </a>
-            </div>
-            <p class="text-xs text-slate-600 mt-1">전 구간이 완만한 송이 흙길로 조성되어 디럭스/휴대용 유모차 주행이 가능하며, 아기에게 무해한 울창한 피톤치드를 선사합니다.</p>
-          </div>
-
-          <!-- Place 3: 동화마을 / 스누피가든 -->
-          <div class="bg-white border border-slate-200 p-3.5 rounded-xl shadow-xs">
-            <div class="flex justify-between items-start">
-              <div>
-                <span class="text-[10px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded">감성 힐링 공간</span>
-                <h5 class="font-bold text-slate-900 text-sm mt-1">송당 동화마을 & 스타벅스 제주송당파크</h5>
-              </div>
-              <a href="https://map.naver.com/p/search/송당%20동화마을" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-semibold bg-[#03C75A] text-white hover:bg-emerald-600 px-2.5 py-1 rounded-md shadow-xs">
-                <i class="fa-solid fa-map-pin"></i> 지도
-              </a>
-            </div>
-            <p class="text-xs text-slate-600 mt-1">무료 개방 공원으로 넓은 정원과 유모차 동선이 탁월하며, 지인 식당 '로티'와 차로 5분 거리에 위치해 있습니다.</p>
-          </div>
-
-          <!-- Place 4: 섭지코지 -->
-          <div class="bg-white border border-slate-200 p-3.5 rounded-xl shadow-xs">
-            <div class="flex justify-between items-start">
-              <div>
-                <span class="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded">3일차 점심 후 추천</span>
-                <h5 class="font-bold text-slate-900 text-sm mt-1">섭지코지 완만 산책로</h5>
-              </div>
-              <a href="https://map.naver.com/p/search/섭지코지" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-semibold bg-[#03C75A] text-white hover:bg-emerald-600 px-2.5 py-1 rounded-md shadow-xs">
-                <i class="fa-solid fa-map-pin"></i> 지도
-              </a>
-            </div>
-            <p class="text-xs text-slate-600 mt-1">바다와 성산일출봉을 한눈에 담을 수 있는 절경. 포장된 산책로 덕분에 유모차로도 시원한 11월 바다 바람을 만끽할 수 있습니다.</p>
-          </div>
+        <div class="flex gap-2 pt-1">
+          <button onclick="closePromoteModal()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition">취소</button>
+          <button onclick="confirmPromoteItem()" class="flex-1 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-xs transition shadow-xs">일정으로 이동</button>
         </div>
       </div>
-
-      <!-- 2. 추천 로컬 먹거리 -->
-      <div class="space-y-3">
-        <div class="flex items-center justify-between">
-          <h4 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
-            <i class="fa-solid fa-utensils text-orange-500"></i>
-            <span>성인 4인을 위한 제주 미식 추천 가이드</span>
-          </h4>
-          <span class="text-[11px] text-slate-400 font-medium">쾌적한 좌석·동선</span>
-        </div>
-
-        <div id="recommend-foods-container" class="space-y-2.5">
-          <!-- Food 1: 고등어회 재료 구매처 -->
-          <div class="bg-white border border-slate-200 p-3.5 rounded-xl shadow-xs">
-            <div class="flex justify-between items-start">
-              <div>
-                <span class="text-[10px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded">직접 만드는 고등어회 팁</span>
-                <h5 class="font-bold text-slate-900 text-sm mt-1">동문시장 수산시장 & 제주시 수협</h5>
-              </div>
-              <a href="https://map.naver.com/p/search/제주%20동문재래시장%20수산시장" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-semibold bg-[#03C75A] text-white hover:bg-emerald-600 px-2.5 py-1 rounded-md shadow-xs">
-                <i class="fa-solid fa-map-pin"></i> 지도
-              </a>
-            </div>
-            <p class="text-xs text-slate-600 mt-1">수조에서 갓 잡은 싱싱한 활고등어를 오로시(포 뜨기) 상태로 주문하면, 객실에서 손쉽게 껍질을 벗기고 썰어 최상의 신선도로 즐길 수 있습니다.</p>
-          </div>
-
-          <!-- Food 2: 표선 흑돼지 -->
-          <div class="bg-white border border-slate-200 p-3.5 rounded-xl shadow-xs">
-            <div class="flex justify-between items-start">
-              <div>
-                <span class="text-[10px] font-bold text-orange-700 bg-orange-50 px-2 py-0.5 rounded">1일차/2일차 저녁 추천</span>
-                <h5 class="font-bold text-slate-900 text-sm mt-1">표선 가시식당 or 검은여식당 (흑돼지/두루치기)</h5>
-              </div>
-              <a href="https://map.naver.com/p/search/표선%20흑돼지%20맛집" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-semibold bg-[#03C75A] text-white hover:bg-emerald-600 px-2.5 py-1 rounded-md shadow-xs">
-                <i class="fa-solid fa-map-pin"></i> 지도
-              </a>
-            </div>
-            <p class="text-xs text-slate-600 mt-1">육즙 가득한 두툼한 근고기와 제주식 몸국을 함께 즐길 수 있으며, 해비치 호텔에서 차로 5분 이내로 아기 컨디션을 관리하기에 매우 유리합니다.</p>
-          </div>
-
-          <!-- Food 3: 성산/서귀포 통갈치구이 -->
-          <div class="bg-white border border-slate-200 p-3.5 rounded-xl shadow-xs">
-            <div class="flex justify-between items-start">
-              <div>
-                <span class="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded">3일차 점심 추천</span>
-                <h5 class="font-bold text-slate-900 text-sm mt-1">성산 갈치조림 & 통갈치구이 명가</h5>
-              </div>
-              <a href="https://map.naver.com/p/search/성산%20통갈치구이" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-semibold bg-[#03C75A] text-white hover:bg-emerald-600 px-2.5 py-1 rounded-md shadow-xs">
-                <i class="fa-solid fa-map-pin"></i> 지도
-              </a>
-            </div>
-            <p class="text-xs text-slate-600 mt-1">성인 4명이 푸짐하고 정갈하게 먹기 좋은 1미터 은갈치 한상. 가시를 전부 발라주어 편안하게 식사할 수 있습니다.</p>
-          </div>
-
-          <!-- Food 4: 보말칼국수 & 죽 -->
-          <div class="bg-white border border-slate-200 p-3.5 rounded-xl shadow-xs">
-            <div class="flex justify-between items-start">
-              <div>
-                <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">간편하고 진한 한 끼</span>
-                <h5 class="font-bold text-slate-900 text-sm mt-1">표선 당케올레국수 (보말칼국수/보말죽)</h5>
-              </div>
-              <a href="https://map.naver.com/p/search/표선%20당케올레국수" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-semibold bg-[#03C75A] text-white hover:bg-emerald-600 px-2.5 py-1 rounded-md shadow-xs">
-                <i class="fa-solid fa-map-pin"></i> 지도
-              </a>
-            </div>
-            <p class="text-xs text-slate-600 mt-1">진하고 구수한 보말 육수에 칼국수와 밥이 함께 말아져 나오는 표선 최고 인기 맛집. 아침 또는 이른 점심으로 탁월합니다.</p>
-          </div>
-        </div>
-      </div>
-
-    </main>
-
-    <!-- TAB 4: EMERGENCY (비상 의료 & 소아과) -->
-    <main id="tab-content-emergency" class="hidden flex-1 p-5 space-y-5">
-      
-      <!-- Emergency Header Alert -->
-      <div class="bg-rose-50 border border-rose-200 rounded-2xl p-4 text-rose-900">
-        <div class="flex items-center gap-2 font-bold text-sm text-rose-700">
-          <i class="fa-solid fa-truck-medical text-lg"></i>
-          <span>100일 아기 응급 & 병의원 가이드</span>
-        </div>
-        <p class="text-xs text-rose-800 mt-1 leading-relaxed">
-          낯선 환경에서 아기 열(38°C 이상)이나 급성 복통이 발생했을 때 당황하지 않고 즉시 전화 연결 및 방문할 수 있는 비상 연락처입니다.
-        </p>
-      </div>
-
-      <!-- Quick Emergency Call Numbers -->
-      <div class="space-y-3">
-        <h4 class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-          <i class="fa-solid fa-hospital text-rose-600"></i> 야간/휴일 달빛어린이병원 & 응급실
-        </h4>
-
-        <!-- Hospital 1: 연동 365의원 (달빛어린이병원) -->
-        <div class="bg-white border border-slate-200 p-3.5 rounded-xl shadow-xs">
-          <div class="flex justify-between items-start">
-            <div>
-              <span class="text-[10px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded">야간/주말 진료 소아과</span>
-              <h5 class="font-bold text-slate-900 text-sm mt-1">연동365의원 (달빛어린이병원)</h5>
-              <p class="text-[11px] text-slate-500 mt-0.5">제주시 신대로 103 (제주공항 인근 약 10분)</p>
-            </div>
-            <a href="tel:064-748-0365" class="inline-flex items-center gap-1 text-[11px] font-bold bg-rose-500 text-white hover:bg-rose-600 px-3 py-1.5 rounded-lg shadow-xs transition">
-              <i class="fa-solid fa-phone"></i> 전화
-            </a>
-          </div>
-          <div class="mt-2 text-[11px] text-slate-600 flex items-center justify-between">
-            <span>평일/주말 23:00까지 야간 진료</span>
-            <a href="https://map.naver.com/p/search/제주%20연동365의원" target="_blank" rel="noopener noreferrer" class="text-emerald-600 hover:underline font-semibold flex items-center gap-1">
-              <i class="fa-solid fa-map-pin"></i> 네이버 지도
-            </a>
-          </div>
-        </div>
-
-        <!-- Hospital 2: 서귀포의료원 응급실 -->
-        <div class="bg-white border border-slate-200 p-3.5 rounded-xl shadow-xs">
-          <div class="flex justify-between items-start">
-            <div>
-              <span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">서귀포 권역 응급센터</span>
-              <h5 class="font-bold text-slate-900 text-sm mt-1">제주특별자치도 서귀포의료원</h5>
-              <p class="text-[11px] text-slate-500 mt-0.5">서귀포시 장수로 47 (해비치에서 차로 약 35분)</p>
-            </div>
-            <a href="tel:064-730-3109" class="inline-flex items-center gap-1 text-[11px] font-bold bg-rose-500 text-white hover:bg-rose-600 px-3 py-1.5 rounded-lg shadow-xs transition">
-              <i class="fa-solid fa-phone"></i> 응급실
-            </a>
-          </div>
-          <div class="mt-2 text-[11px] text-slate-600 flex items-center justify-between">
-            <span>24시간 응급실 운영 및 소아진료</span>
-            <a href="https://map.naver.com/p/search/서귀포의료원" target="_blank" rel="noopener noreferrer" class="text-emerald-600 hover:underline font-semibold flex items-center gap-1">
-              <i class="fa-solid fa-map-pin"></i> 네이버 지도
-            </a>
-          </div>
-        </div>
-
-        <!-- Hospital 3: 표선 인근 로컬 의원 & 약국 -->
-        <div class="bg-white border border-slate-200 p-3.5 rounded-xl shadow-xs">
-          <div class="flex justify-between items-start">
-            <div>
-              <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">해비치 호텔 인근 (차로 3분)</span>
-              <h5 class="font-bold text-slate-900 text-sm mt-1">표선의원 & 표선종로약국</h5>
-              <p class="text-[11px] text-slate-500 mt-0.5">서귀포시 표선면 표선동서로 235</p>
-            </div>
-            <a href="tel:064-787-0034" class="inline-flex items-center gap-1 text-[11px] font-bold bg-slate-800 text-white hover:bg-slate-900 px-3 py-1.5 rounded-lg shadow-xs transition">
-              <i class="fa-solid fa-phone"></i> 의원
-            </a>
-          </div>
-          <div class="mt-2 text-[11px] text-slate-600 flex items-center justify-between">
-            <span>주간 감기/기본 진료 및 해열제 처방</span>
-            <a href="https://map.naver.com/p/search/표선의원" target="_blank" rel="noopener noreferrer" class="text-emerald-600 hover:underline font-semibold flex items-center gap-1">
-              <i class="fa-solid fa-map-pin"></i> 네이버 지도
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Quick 119 Medical Advice -->
-      <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center justify-between text-xs text-amber-900">
-        <div>
-          <span class="font-bold">119 응급의료 상담 서비스:</span>
-          <p class="text-[11px] text-amber-800 mt-0.5">병원 가기 전 소아 전문 당직의사 실시간 전화 상담 가능</p>
-        </div>
-        <a href="tel:119" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg shrink-0">
-          119 연결
-        </a>
-      </div>
-
-    </main>
+    </div>
 
     <!-- Modal for Adding Custom Schedule -->
     <div id="add-schedule-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 hidden">
@@ -1022,10 +797,10 @@
 
         row.innerHTML = `
           <label class="flex items-center gap-2.5 flex-1 cursor-pointer select-none min-w-0">
-            <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="window.togglePendingItem('${item.id}')" class="w-3.5 h-3.5 text-amber-600 rounded border-amber-300 focus:ring-amber-500 shrink-0">
+            <input type="checkbox" onchange="window.handlePendingCheckboxClick('${item.id}', this)" class="w-4 h-4 text-orange-600 rounded border-amber-300 focus:ring-orange-500 shrink-0 cursor-pointer">
             <div class="flex items-center gap-1.5 flex-wrap min-w-0">
               ${regionBadge}
-              <span class="text-xs text-slate-800 leading-snug break-keep ${item.checked ? 'line-through text-slate-400' : 'font-medium'}">
+              <span class="text-xs text-slate-800 leading-snug break-keep font-medium">
                 ${item.text}
               </span>
             </div>
@@ -1043,14 +818,74 @@
       });
     }
 
-    function togglePendingItem(id) {
+    // Modal workflow to move pending item to confirmed day schedule
+    function handlePendingCheckboxClick(id, checkboxEl) {
       const item = pendingItems.find(p => p.id === id);
-      if (item) {
-        item.checked = !item.checked;
-        localStorage.setItem(STORAGE_KEY_PENDING_SCHEDULES, JSON.stringify(pendingItems));
-        renderPendingItems();
-        syncToCloud();
-      }
+      if (!item) return;
+
+      // Prevent immediate checkbox check mark until confirmed
+      checkboxEl.checked = false;
+
+      // Open promote modal
+      document.getElementById('promote-item-id').value = item.id;
+      document.getElementById('promote-item-title').textContent = item.text;
+      document.getElementById('promote-item-query').value = item.query || item.text;
+      document.getElementById('promote-day').value = '1';
+      document.getElementById('promote-period').value = 'PM';
+      document.getElementById('promote-hour').value = '02';
+      document.getElementById('promote-minute').value = '00';
+      document.getElementById('promote-desc').value = '';
+
+      document.getElementById('promote-pending-modal').classList.remove('hidden');
+    }
+
+    function closePromoteModal() {
+      document.getElementById('promote-pending-modal').classList.add('hidden');
+    }
+
+    function confirmPromoteItem() {
+      const itemId = document.getElementById('promote-item-id').value;
+      const title = document.getElementById('promote-item-title').textContent;
+      const query = document.getElementById('promote-item-query').value;
+      const day = parseInt(document.getElementById('promote-day').value, 10);
+      const period = document.getElementById('promote-period').value;
+      const hourNum = parseInt(document.getElementById('promote-hour').value, 10);
+      const minute = document.getElementById('promote-minute').value;
+      const desc = document.getElementById('promote-desc').value.trim();
+
+      // Calculate military 24h sortTime
+      let militaryHour = hourNum;
+      if (period === 'PM' && hourNum < 12) militaryHour += 12;
+      if (period === 'AM' && hourNum === 12) militaryHour = 0;
+      const sortTime = String(militaryHour).padStart(2, '0') + ':' + minute;
+
+      const displayPeriod = period === 'AM' ? '오전' : '오후';
+      const timeStr = `${displayPeriod} ${hourNum}:${minute} (${sortTime})`;
+
+      // 1. Add to custom events
+      const newEvent = {
+        id: 'ev_' + Date.now(),
+        day: day,
+        time: timeStr,
+        sortTime: sortTime,
+        title: title,
+        desc: desc || `미정 일정에서 ${day}일차로 확정 등록됨`,
+        query: query
+      };
+      customEvents.push(newEvent);
+      localStorage.setItem(STORAGE_KEY_CUSTOM_EVENTS, JSON.stringify(customEvents));
+
+      // 2. Remove from pending items
+      pendingItems = pendingItems.filter(p => p.id !== itemId);
+      localStorage.setItem(STORAGE_KEY_PENDING_SCHEDULES, JSON.stringify(pendingItems));
+
+      // 3. Re-render UI & sync
+      renderSchedules();
+      renderPendingItems();
+      closePromoteModal();
+      syncToCloud();
+
+      showToast(`'${title}' 항목이 ${day}일차 일정으로 등록되었습니다!`);
     }
 
     function addPendingItem() {
@@ -1688,7 +1523,9 @@
     window.toggleCheckItem = toggleCheckItem;
     window.addCustomCheckItem = addCustomCheckItem;
     window.resetChecklist = resetChecklist;
-    window.togglePendingItem = togglePendingItem;
+    window.handlePendingCheckboxClick = handlePendingCheckboxClick;
+    window.closePromoteModal = closePromoteModal;
+    window.confirmPromoteItem = confirmPromoteItem;
     window.addPendingItem = addPendingItem;
     window.deletePendingItem = deletePendingItem;
     window.fetchLiveTip = fetchLiveTip;
