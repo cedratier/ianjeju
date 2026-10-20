@@ -39,6 +39,13 @@
     body {
       font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       -webkit-tap-highlight-color: transparent;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+    }
+    /* 단어 단위 줄바꿈 강제 및 텍스트 끊김 방지 */
+    h1, h2, h3, h4, h5, p, span, div, label, button, a {
+      word-break: keep-all;
+      overflow-wrap: break-word;
     }
     /* Hide scrollbars for slick mobile view */
     .no-scrollbar::-webkit-scrollbar {
@@ -67,16 +74,16 @@
           <i class="fa-solid fa-umbrella-beach"></i>
         </span>
         <div>
-          <h1 class="text-lg font-extrabold text-slate-900 tracking-tight flex items-center gap-1.5">
+          <h1 class="text-lg font-extrabold text-slate-900 tracking-tight flex items-center gap-1.5 leading-snug">
             이안이와 함께하는 제주 힐링 트립 
           </h1>
           <div class="space-y-0.5 mt-0.5">
             <p class="text-xs font-medium text-slate-600">2026.11.02(월) ~ 11.04(수)</p>
-            <div class="flex items-center gap-2">
-              <span class="text-xs text-orange-600 font-semibold flex items-center gap-1">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-xs text-orange-600 font-semibold flex items-center gap-1 shrink-0">
                 <i class="fa-solid fa-hotel text-[10px]"></i> 해비치 호텔 & 리조트
               </span>
-              <span id="sync-status-badge" class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span id="sync-status-badge" class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
                 <span id="sync-status-text">동기화 연결 중</span>
               </span>
@@ -1011,23 +1018,23 @@
         row.className = 'flex items-center justify-between gap-2 p-2.5 bg-white rounded-xl border border-amber-100 transition hover:border-amber-300 shadow-2xs';
         
         const mapQuery = item.query || item.text;
-        const regionBadge = item.region ? `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 shrink-0">${item.region}</span>` : '';
+        const regionBadge = item.region ? `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 shrink-0 whitespace-nowrap">${item.region}</span>` : '';
 
         row.innerHTML = `
           <label class="flex items-center gap-2.5 flex-1 cursor-pointer select-none min-w-0">
             <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="window.togglePendingItem('${item.id}')" class="w-3.5 h-3.5 text-amber-600 rounded border-amber-300 focus:ring-amber-500 shrink-0">
-            <div class="flex items-center gap-1.5 flex-wrap">
+            <div class="flex items-center gap-1.5 flex-wrap min-w-0">
               ${regionBadge}
-              <span class="text-xs text-slate-800 leading-snug break-all ${item.checked ? 'line-through text-slate-400' : 'font-medium'}">
+              <span class="text-xs text-slate-800 leading-snug break-keep ${item.checked ? 'line-through text-slate-400' : 'font-medium'}">
                 ${item.text}
               </span>
             </div>
           </label>
           <div class="flex items-center gap-1 shrink-0">
-            <a href="https://map.naver.com/p/search/${encodeURIComponent(mapQuery)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[10px] font-semibold bg-[#03C75A] text-white hover:bg-emerald-600 px-2 py-1 rounded-md shadow-2xs transition" title="네이버 지도에서 보기">
+            <a href="https://map.naver.com/p/search/${encodeURIComponent(mapQuery)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[10px] font-semibold bg-[#03C75A] text-white hover:bg-emerald-600 px-2 py-1 rounded-md shadow-2xs transition whitespace-nowrap" title="네이버 지도에서 보기">
               <i class="fa-solid fa-map-pin"></i> 지도
             </a>
-            <button onclick="window.deletePendingItem('${item.id}')" class="text-slate-300 hover:text-rose-500 p-1 text-xs" title="삭제">
+            <button onclick="window.deletePendingItem('${item.id}')" class="text-slate-300 hover:text-rose-500 p-1 text-xs shrink-0" title="삭제">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
@@ -1292,57 +1299,57 @@
           if (!isCustom) {
             // Base schedule card rendering
             const mapBtn = item.mapUrl ? `
-              <a href="${item.mapUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-semibold bg-[#03C75A] text-white hover:bg-emerald-600 px-2.5 py-1 rounded-md shadow-xs transition">
+              <a href="${item.mapUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-semibold bg-[#03C75A] text-white hover:bg-emerald-600 px-2.5 py-1 rounded-md shadow-xs transition shrink-0 whitespace-nowrap">
                 <i class="fa-solid fa-${item.id === 'base_1_4' ? 'basket-shopping' : (item.id.includes('렌트카') ? 'map-location-dot' : 'map-pin')}"></i> ${item.mapTitle || '지도'}
               </a>
             ` : '';
 
-            const tagBadge = item.tag ? `<span class="text-[10px] font-bold px-1.5 py-0.5 bg-rose-500 text-white rounded">${item.tag}</span>` : '';
+            const tagBadge = item.tag ? `<span class="text-[10px] font-bold px-1.5 py-0.5 bg-rose-500 text-white rounded shrink-0 whitespace-nowrap">${item.tag}</span>` : '';
 
             row.innerHTML = `
               <div class="absolute -left-[31px] top-1.5 w-4 h-4 rounded-full ${item.bulletColor || 'bg-slate-400'} border-2 border-white shadow"></div>
               <div class="${item.cardClass || 'bg-white border-slate-200'} border p-3.5 rounded-xl shadow-xs">
-                <div class="flex justify-between items-start">
-                  <div>
-                    <div class="flex items-center gap-1">
-                      <span class="text-xs font-bold ${item.timeBadgeClass || 'text-slate-600 bg-slate-100'} px-2 py-0.5 rounded">${item.time}</span>
+                <div class="flex justify-between items-start gap-2">
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-1 flex-wrap">
+                      <span class="text-xs font-bold ${item.timeBadgeClass || 'text-slate-600 bg-slate-100'} px-2 py-0.5 rounded whitespace-nowrap">${item.time}</span>
                       ${tagBadge}
                     </div>
-                    <h4 class="font-bold text-slate-900 text-sm mt-1">${item.title}</h4>
+                    <h4 class="font-bold text-slate-900 text-sm mt-1 leading-snug break-keep">${item.title}</h4>
                   </div>
                   ${mapBtn}
                 </div>
-                ${item.desc ? `<p class="text-xs text-slate-600 mt-1">${item.desc}</p>` : ''}
+                ${item.desc ? `<p class="text-xs text-slate-600 mt-1 leading-relaxed break-keep">${item.desc}</p>` : ''}
                 ${item.specialHtml || ''}
               </div>
             `;
           } else {
             // User added custom schedule card rendering
             const mapBtn = item.query ? `
-              <a href="https://map.naver.com/p/search/${encodeURIComponent(item.query)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-semibold bg-[#03C75A] text-white hover:bg-emerald-600 px-2.5 py-1 rounded-md shadow-xs">
-                <i class="fa-solid fa-map-pin"></i> 네이버 지도
+              <a href="https://map.naver.com/p/search/${encodeURIComponent(item.query)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-semibold bg-[#03C75A] text-white hover:bg-emerald-600 px-2.5 py-1 rounded-md shadow-xs shrink-0 whitespace-nowrap">
+                <i class="fa-solid fa-map-pin"></i> 지도
               </a>
             ` : '';
 
             row.innerHTML = `
               <div class="absolute -left-[31px] top-1.5 w-4 h-4 rounded-full bg-violet-500 border-2 border-white shadow"></div>
               <div class="bg-violet-50/70 border border-violet-200 p-3.5 rounded-xl shadow-xs transition hover:border-violet-300">
-                <div class="flex justify-between items-start">
-                  <div>
-                    <div class="flex items-center gap-1.5">
-                      <span class="text-xs font-bold text-violet-700 bg-violet-100 px-2 py-0.5 rounded">${item.time}</span>
-                      <span class="text-[10px] font-bold px-1.5 py-0.5 bg-violet-600 text-white rounded">추가 일정</span>
+                <div class="flex justify-between items-start gap-2">
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                      <span class="text-xs font-bold text-violet-700 bg-violet-100 px-2 py-0.5 rounded whitespace-nowrap">${item.time}</span>
+                      <span class="text-[10px] font-bold px-1.5 py-0.5 bg-violet-600 text-white rounded shrink-0 whitespace-nowrap">추가 일정</span>
                     </div>
-                    <h4 class="font-bold text-slate-900 text-sm mt-1">${item.title}</h4>
+                    <h4 class="font-bold text-slate-900 text-sm mt-1 leading-snug break-keep">${item.title}</h4>
                   </div>
-                  <div class="flex items-center gap-1.5">
+                  <div class="flex items-center gap-1.5 shrink-0">
                     ${mapBtn}
-                    <button onclick="window.deleteCustomEvent('${item.id}')" class="text-slate-400 hover:text-rose-500 p-1 text-xs" title="일정 삭제">
+                    <button onclick="window.deleteCustomEvent('${item.id}')" class="text-slate-400 hover:text-rose-500 p-1 text-xs shrink-0" title="일정 삭제">
                       <i class="fa-solid fa-trash-can"></i>
                     </button>
                   </div>
                 </div>
-                ${item.desc ? `<p class="text-xs text-slate-700 mt-1.5">${item.desc}</p>` : ''}
+                ${item.desc ? `<p class="text-xs text-slate-700 mt-1.5 leading-relaxed break-keep">${item.desc}</p>` : ''}
               </div>
             `;
           }
@@ -1385,8 +1392,8 @@
         cat.items.forEach(item => {
           itemsHtml += `
             <label class="flex items-start gap-3 p-2 rounded-xl hover:bg-slate-50 cursor-pointer transition select-none">
-              <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="window.toggleCheckItem('${cat.id}', '${item.id}')" class="mt-0.5 w-4 h-4 text-orange-600 rounded border-slate-300 focus:ring-orange-500">
-              <span class="text-xs text-slate-700 leading-snug flex-1 ${item.checked ? 'line-through text-slate-400' : ''}">
+              <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="window.toggleCheckItem('${cat.id}', '${item.id}')" class="mt-0.5 w-4 h-4 text-orange-600 rounded border-slate-300 focus:ring-orange-500 shrink-0">
+              <span class="text-xs text-slate-700 leading-snug flex-1 break-keep ${item.checked ? 'line-through text-slate-400' : ''}">
                 ${item.text}
               </span>
             </label>
@@ -1395,8 +1402,8 @@
 
         catBox.innerHTML = `
           <h4 class="text-xs font-bold text-slate-800 pb-2 mb-2 border-b border-slate-100 flex items-center justify-between">
-            <span>${cat.title}</span>
-            <span class="text-[11px] text-slate-400 font-normal">${cat.items.filter(i => i.checked).length}/${cat.items.length}</span>
+            <span class="break-keep">${cat.title}</span>
+            <span class="text-[11px] text-slate-400 font-normal shrink-0">${cat.items.filter(i => i.checked).length}/${cat.items.length}</span>
           </h4>
           <div class="space-y-1">
             ${itemsHtml}
@@ -1610,16 +1617,16 @@
           const card = document.createElement('div');
           card.className = 'bg-white border border-slate-200 p-3.5 rounded-xl shadow-xs transition hover:border-emerald-300';
           card.innerHTML = `
-            <div class="flex justify-between items-start">
-              <div>
-                <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">${spot.tag || '추천 명소'}</span>
-                <h5 class="font-bold text-slate-900 text-sm mt-1">${spot.title}</h5>
+            <div class="flex justify-between items-start gap-2">
+              <div class="flex-1 min-w-0">
+                <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded shrink-0 whitespace-nowrap">${spot.tag || '추천 명소'}</span>
+                <h5 class="font-bold text-slate-900 text-sm mt-1 leading-snug break-keep">${spot.title}</h5>
               </div>
-              <a href="https://map.naver.com/p/search/${encodeURIComponent(spot.query || spot.title)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-semibold bg-[#03C75A] text-white hover:bg-emerald-600 px-2.5 py-1 rounded-md shadow-xs">
+              <a href="https://map.naver.com/p/search/${encodeURIComponent(spot.query || spot.title)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-semibold bg-[#03C75A] text-white hover:bg-emerald-600 px-2.5 py-1 rounded-md shadow-xs shrink-0 whitespace-nowrap">
                 <i class="fa-solid fa-map-pin"></i> 지도
               </a>
             </div>
-            <p class="text-xs text-slate-600 mt-1">${spot.desc}</p>
+            <p class="text-xs text-slate-600 mt-1 leading-relaxed break-keep">${spot.desc}</p>
           `;
           spotsContainer.appendChild(card);
         });
@@ -1631,16 +1638,16 @@
           const card = document.createElement('div');
           card.className = 'bg-white border border-slate-200 p-3.5 rounded-xl shadow-xs transition hover:border-orange-300';
           card.innerHTML = `
-            <div class="flex justify-between items-start">
-              <div>
-                <span class="text-[10px] font-bold text-orange-700 bg-orange-50 px-2 py-0.5 rounded">${food.tag || '추천 미식'}</span>
-                <h5 class="font-bold text-slate-900 text-sm mt-1">${food.title}</h5>
+            <div class="flex justify-between items-start gap-2">
+              <div class="flex-1 min-w-0">
+                <span class="text-[10px] font-bold text-orange-700 bg-orange-50 px-2 py-0.5 rounded shrink-0 whitespace-nowrap">${food.tag || '추천 미식'}</span>
+                <h5 class="font-bold text-slate-900 text-sm mt-1 leading-snug break-keep">${food.title}</h5>
               </div>
-              <a href="https://map.naver.com/p/search/${encodeURIComponent(food.query || food.title)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-semibold bg-[#03C75A] text-white hover:bg-emerald-600 px-2.5 py-1 rounded-md shadow-xs">
+              <a href="https://map.naver.com/p/search/${encodeURIComponent(food.query || food.title)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-semibold bg-[#03C75A] text-white hover:bg-emerald-600 px-2.5 py-1 rounded-md shadow-xs shrink-0 whitespace-nowrap">
                 <i class="fa-solid fa-map-pin"></i> 지도
               </a>
             </div>
-            <p class="text-xs text-slate-600 mt-1">${food.desc}</p>
+            <p class="text-xs text-slate-600 mt-1 leading-relaxed break-keep">${food.desc}</p>
           `;
           foodsContainer.appendChild(card);
         });
