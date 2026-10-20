@@ -95,15 +95,19 @@
 
     <!-- Navigation Tabs -->
     <nav class="flex border-b border-slate-200 bg-white sticky top-[69px] z-30 px-2 text-sm overflow-x-auto no-scrollbar">
-      <button onclick="switchTab('plan')" id="tab-btn-plan" class="flex-1 min-w-[75px] py-3 text-center font-medium transition active-tab flex items-center justify-center gap-1 text-xs sm:text-sm">
+      <button onclick="switchTab('plan')" id="tab-btn-plan" class="flex-1 min-w-[70px] py-3 text-center font-medium transition active-tab flex items-center justify-center gap-1 text-xs sm:text-sm">
         <i class="fa-regular fa-calendar-check"></i>
         <span>일정</span>
       </button>
-      <button onclick="switchTab('checklist')" id="tab-btn-checklist" class="flex-1 min-w-[80px] py-3 text-center font-medium text-slate-500 transition hover:text-slate-900 flex items-center justify-center gap-1 text-xs sm:text-sm">
+      <button onclick="switchTab('checklist')" id="tab-btn-checklist" class="flex-1 min-w-[75px] py-3 text-center font-medium text-slate-500 transition hover:text-slate-900 flex items-center justify-center gap-1 text-xs sm:text-sm">
         <i class="fa-solid fa-clipboard-list"></i>
         <span>체크리스트</span>
       </button>
-      <button onclick="switchTab('recommend')" id="tab-btn-recommend" class="flex-1 min-w-[85px] py-3 text-center font-medium text-slate-500 transition hover:text-slate-900 flex items-center justify-center gap-1 text-xs sm:text-sm">
+      <button onclick="switchTab('haevichi')" id="tab-btn-haevichi" class="flex-1 min-w-[85px] py-3 text-center font-medium text-slate-500 transition hover:text-slate-900 flex items-center justify-center gap-1 text-xs sm:text-sm">
+        <i class="fa-solid fa-hotel text-orange-500"></i>
+        <span>해비치 호텔</span>
+      </button>
+      <button onclick="switchTab('recommend')" id="tab-btn-recommend" class="flex-1 min-w-[75px] py-3 text-center font-medium text-slate-500 transition hover:text-slate-900 flex items-center justify-center gap-1 text-xs sm:text-sm">
         <i class="fa-solid fa-compass"></i>
         <span>추천명소</span>
       </button>
@@ -231,6 +235,360 @@
         </div>
       </div>
 
+    </main>
+
+    <!-- TAB 2: CHECKLIST (체크리스트) -->
+    <main id="tab-content-checklist" class="flex-1 p-5 space-y-5 hidden">
+      <!-- Checklist Progress Summary -->
+      <div class="bg-gradient-to-r from-orange-50 via-amber-50 to-orange-50 border border-orange-200 rounded-2xl p-4 shadow-xs">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <span class="p-1.5 bg-orange-500 text-white rounded-lg text-xs">
+              <i class="fa-solid fa-list-check"></i>
+            </span>
+            <span class="text-xs font-bold text-slate-800">준비물 챙김 달성률</span>
+          </div>
+          <span id="checklist-progress-text" class="text-xs font-extrabold text-orange-600">0% (0/0)</span>
+        </div>
+        <div class="w-full bg-orange-100 rounded-full h-2.5 overflow-hidden">
+          <div id="checklist-progress-bar" class="bg-orange-500 h-2.5 rounded-full transition-all duration-300 w-0"></div>
+        </div>
+        <div class="flex items-center justify-between text-[11px] text-slate-500 mt-2">
+          <span>4인이 함께 체크하고 동기화됩니다</span>
+          <button onclick="window.resetChecklist()" class="text-slate-400 hover:text-slate-600 underline text-[11px] transition">
+            기본값 초기화
+          </button>
+        </div>
+      </div>
+
+      <!-- Add Custom Check Item Form -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-3.5 shadow-xs space-y-2.5">
+        <span class="text-xs font-bold text-slate-800 block">새 준비물 추가하기</span>
+        <div class="flex gap-2">
+          <select id="custom-check-category" class="text-xs border border-slate-200 rounded-xl px-2.5 py-2 bg-slate-50 outline-none text-slate-700 font-medium">
+            <option value="baby">👶 아기 용품</option>
+            <option value="adult">👨‍👩‍👧‍👦 성인 4명</option>
+            <option value="docs">📄 서류/예약</option>
+          </select>
+          <input type="text" id="custom-check-input" placeholder="준비물 이름 입력..." class="flex-1 text-xs border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-orange-500">
+          <button onclick="window.addCustomCheckItem()" class="bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-xs">
+            추가
+          </button>
+        </div>
+      </div>
+
+      <!-- Checklist Categories Container (Rendered via JS) -->
+      <div id="checklist-container" class="space-y-4">
+        <!-- Rendered dynamically -->
+      </div>
+    </main>
+
+    <!-- TAB: HAEVICHI HOTEL & RESORT GUIDE (해비치 호텔 100% 활용 인프라 가이드) -->
+    <main id="tab-content-haevichi" class="flex-1 p-5 space-y-5 hidden">
+      <!-- Haevichi Hero Header Banner -->
+      <div class="bg-gradient-to-r from-orange-500 via-amber-600 to-orange-600 text-white rounded-2xl p-4 shadow-md relative overflow-hidden">
+        <div class="relative z-10 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-xs">Haevichi Hotel & Resort</span>
+            <span class="text-[11px] font-medium bg-black/20 px-2 py-0.5 rounded-md flex items-center gap-1">
+              <i class="fa-solid fa-location-dot text-amber-300"></i> 제주 서귀포시 표선면
+            </span>
+          </div>
+          <h3 class="text-base font-extrabold tracking-tight">해비치 인프라 100% 활용 가이드</h3>
+          <p class="text-xs text-orange-100 leading-relaxed break-keep">
+            100일 아기와 성인 4명이 호텔과 리조트의 최고급 시설을 온전히 누릴 수 있는 맞춤 팁입니다.
+          </p>
+          <div class="pt-1 flex gap-2">
+            <a href="tel:064-780-8000" class="inline-flex items-center gap-1 text-[11px] font-bold bg-white text-orange-600 hover:bg-orange-50 px-2.5 py-1.5 rounded-lg shadow-xs transition">
+              <i class="fa-solid fa-phone"></i> 대표번호 연결
+            </a>
+            <a href="https://m.map.naver.com/search2/search.naver?query=%ED%95%B4%EB%B9%84%EC%B9%98%ED%98%B8%ED%85%94%EC%95%A4%EB%93%9C%EB%A6%AC%EC%A1%B0%ED%8A%B8+%EC%A0%9C%EC%A3%BC" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-bold bg-white/20 hover:bg-white/30 text-white px-2.5 py-1.5 rounded-lg transition">
+              <i class="fa-solid fa-map-location-dot"></i> 호텔 위치 지도
+            </a>
+          </div>
+        </div>
+        <i class="fa-solid fa-hotel absolute -right-3 -bottom-4 text-7xl text-white/10 pointer-events-none"></i>
+      </div>
+
+      <!-- Realtime Haevichi Hotel Live Tips Card -->
+      <div class="bg-gradient-to-r from-amber-50 via-orange-50 to-rose-50 border border-orange-200 rounded-2xl p-4 text-xs text-orange-950 shadow-xs space-y-2">
+        <div class="flex items-center justify-between pb-1.5 border-b border-orange-200/60">
+          <div class="flex items-center gap-2 font-bold text-orange-900">
+            <span class="p-1.5 bg-orange-500 text-white rounded-lg text-xs leading-none">
+              <i class="fa-solid fa-sparkles"></i>
+            </span>
+            <span class="text-sm">실시간 해비치 호캉스 팁</span>
+          </div>
+          <button onclick="window.fetchLiveHaevichiTip()" id="haevichi-tip-refresh-btn" class="inline-flex items-center gap-1 text-xs font-bold text-orange-700 hover:text-orange-900 bg-white hover:bg-orange-50/80 px-2.5 py-1.5 rounded-lg border border-orange-200 transition shadow-2xs">
+            <i id="haevichi-tip-refresh-icon" class="fa-solid fa-arrows-rotate"></i>
+            <span>새로운 팁</span>
+          </button>
+        </div>
+        <p id="haevichi-live-tip" class="text-xs text-slate-700 leading-relaxed break-keep font-medium">
+          해비치 1층 '마고' 베이커리는 오후 5시 이후 시그니처 롤케이크가 빠르게 마감될 수 있습니다. 체크인 직후 들러 포장해 두시면 저녁 객실 티타임에 달콤하게 즐기실 수 있습니다.
+        </p>
+      </div>
+
+      <!-- CATEGORY 1: 100일 아기 케어 & 무료 대여 인프라 -->
+      <section class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs space-y-3">
+        <div class="flex items-center gap-2 border-b border-slate-100 pb-2.5">
+          <span class="w-7 h-7 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center text-xs font-bold shrink-0">
+            <i class="fa-solid fa-baby"></i>
+          </span>
+          <div>
+            <h4 class="text-sm font-extrabold text-slate-900 leading-none">100일 아기 케어 & 무료 대여 인프라</h4>
+            <p class="text-[11px] text-slate-500 mt-1">사전 예약 필수 / 한정 수량 선착순 지원 품목</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div class="bg-orange-50/70 border border-orange-100 p-2.5 rounded-xl">
+            <div class="font-bold text-orange-950 flex items-center gap-1">
+              <i class="fa-solid fa-bed text-orange-600"></i> 아기침대 & 침대가드
+            </div>
+            <p class="text-[11px] text-slate-600 mt-1 leading-snug break-keep">
+              생후 100일 아기 수면을 위한 유아 원목 침대 및 침대 낙상 방지 가드 무료 설치
+            </p>
+          </div>
+          <div class="bg-amber-50/70 border border-amber-100 p-2.5 rounded-xl">
+            <div class="font-bold text-amber-950 flex items-center gap-1">
+              <i class="fa-solid fa-soap text-amber-600"></i> 유팡 젖병소독기
+            </div>
+            <p class="text-[11px] text-slate-600 mt-1 leading-snug break-keep">
+              객실 내 UV 젖병소독기 설치로 3일 내내 위생적인 수유 젖병 살균 가능
+            </p>
+          </div>
+          <div class="bg-sky-50/70 border border-sky-100 p-2.5 rounded-xl">
+            <div class="font-bold text-sky-950 flex items-center gap-1">
+              <i class="fa-solid fa-bath text-sky-600"></i> 아기욕조 & 세면대
+            </div>
+            <p class="text-[11px] text-slate-600 mt-1 leading-snug break-keep">
+              객실 욕실에 유아용 바스 터브 대여로 100일 아기 온수 목욕 편리
+            </p>
+          </div>
+          <div class="bg-emerald-50/70 border border-emerald-100 p-2.5 rounded-xl">
+            <div class="font-bold text-emerald-950 flex items-center gap-1">
+              <i class="fa-solid fa-baby-carriage text-emerald-600"></i> 디럭스 유모차
+            </div>
+            <p class="text-[11px] text-slate-600 mt-1 leading-snug break-keep">
+              컨시어지 데스크에서 호텔 내 산책용 프리미엄 유모차 무료 대여
+            </p>
+          </div>
+        </div>
+
+        <!-- Baby Feeding & Microwave Tip -->
+        <div class="bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs space-y-1">
+          <div class="font-bold text-slate-800 flex items-center gap-1.5">
+            <span class="text-orange-600"><i class="fa-solid fa-lightbulb"></i></span>
+            <span>수유 & 이유식/분유 데우기 꿀팁</span>
+          </div>
+          <p class="text-[11px] text-slate-600 leading-relaxed break-keep">
+            리조트 동 지하 CU 편의점 또는 리조트 프론트에 전자레인지가 비치되어 있어 보온병 물 보충 및 수유 온도를 편리하게 맞출 수 있습니다.
+          </p>
+        </div>
+      </section>
+
+      <!-- CATEGORY 2: 윈터가든 실내외 수영장 & 온수풀 정복 -->
+      <section class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs space-y-3">
+        <div class="flex items-center gap-2 border-b border-slate-100 pb-2.5">
+          <span class="w-7 h-7 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center text-xs font-bold shrink-0">
+            <i class="fa-solid fa-water-ladder"></i>
+          </span>
+          <div>
+            <h4 class="text-sm font-extrabold text-slate-900 leading-none">윈터가든 실내 온수풀 & 스파 이용 가이드</h4>
+            <p class="text-[11px] text-slate-500 mt-1">호텔 1층 / 사계절 미온수 운영</p>
+          </div>
+        </div>
+
+        <div class="space-y-2 text-xs">
+          <div class="flex items-start gap-2.5 p-2 rounded-xl bg-sky-50/60 border border-sky-100">
+            <span class="w-5 h-5 rounded-md bg-sky-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">1</span>
+            <div class="min-w-0 flex-1">
+              <strong class="text-sky-950 font-bold block">운영 시간 & 투숙객 혜택</strong>
+              <p class="text-[11px] text-slate-600 mt-0.5 leading-snug break-keep">
+                실내 수영장 <strong>06:30 ~ 22:00</strong> (입장마감 21:30) / 호텔&리조트 투숙객 전원 무료 입장 (실내 온수풀과 유아풀 구비)
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-2.5 p-2 rounded-xl bg-orange-50/60 border border-orange-100">
+            <span class="w-5 h-5 rounded-md bg-orange-500 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">2</span>
+            <div class="min-w-0 flex-1">
+              <strong class="text-orange-950 font-bold block">100일 아기 수영 필수 수칙 (방수기저귀)</strong>
+              <p class="text-[11px] text-slate-600 mt-0.5 leading-snug break-keep">
+                만 48개월 미만 유아는 <strong>방수 기저귀 착용 필수</strong>입니다. 영아 목튜브 또는 소형 보행기 튜브(지름 1m 이내) 사용이 가능하며, 체온 보호를 위해 15~20분 수영 후 따뜻한 자쿠지에서 쉬어가세요.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-2.5 p-2 rounded-xl bg-slate-50 border border-slate-200">
+            <span class="w-5 h-5 rounded-md bg-slate-700 text-white flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">3</span>
+            <div class="min-w-0 flex-1">
+              <strong class="text-slate-900 font-bold block">복장 및 무료 대여 용품</strong>
+              <p class="text-[11px] text-slate-600 mt-0.5 leading-snug break-keep">
+                수영복 또는 래시가드 착용 필수 (면 티/면바지 불가). 수영모 또는 캡모자 착용 권장. 킥판 및 아동용 구명조끼는 현장에서 무료 대여 가능합니다.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-0.5">
+          <a href="tel:064-780-8530" class="w-full py-2 bg-sky-50 text-sky-700 hover:bg-sky-100 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition border border-sky-200">
+            <i class="fa-solid fa-phone"></i> 윈터가든 수영장 직통 문의 (064-780-8530)
+          </a>
+        </div>
+      </section>
+
+      <!-- CATEGORY 3: 성인 4인 힐링 & 다이닝 인프라 -->
+      <section class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs space-y-3">
+        <div class="flex items-center gap-2 border-b border-slate-100 pb-2.5">
+          <span class="w-7 h-7 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold shrink-0">
+            <i class="fa-solid fa-champagne-glasses"></i>
+          </span>
+          <div>
+            <h4 class="text-sm font-extrabold text-slate-900 leading-none">성인 4인 힐링 & 미식 인프라</h4>
+            <p class="text-[11px] text-slate-500 mt-1">교대로 아기를 보며 여유를 즐기는 호텔 스팟</p>
+          </div>
+        </div>
+
+        <div class="space-y-2 text-xs">
+          <div class="p-2.5 rounded-xl border border-slate-200 bg-white">
+            <div class="flex justify-between items-center mb-1">
+              <strong class="text-slate-900 font-bold">글라스 아뜨리움 & 이디 라운지</strong>
+              <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded">호텔 1층 중앙</span>
+            </div>
+            <p class="text-[11px] text-slate-600 leading-snug break-keep">
+              천장 전체가 유리로 탁 트인 아시아 최대 규모의 중앙 실내 아트리움. 저녁 시간 피아노 라이브 연주나 차 한 잔을 즐기며 힐링하기 좋습니다.
+            </p>
+          </div>
+
+          <div class="p-2.5 rounded-xl border border-slate-200 bg-white">
+            <div class="flex justify-between items-center mb-1">
+              <strong class="text-slate-900 font-bold">베이커리 '마고 (Margaux)'</strong>
+              <span class="text-[10px] bg-orange-100 text-orange-800 font-bold px-1.5 py-0.5 rounded">호텔 1층</span>
+            </div>
+            <p class="text-[11px] text-slate-600 leading-snug break-keep">
+              당일 갓 구워낸 시그니처 롤케이크, 크루아상, 제주 감귤 타르트가 유명합니다. 지인 도라지 빵과 함께 객실 티타임 간식으로 제격입니다.
+            </p>
+          </div>
+
+          <div class="p-2.5 rounded-xl border border-teal-200 bg-teal-50/60">
+            <div class="flex justify-between items-center mb-1">
+              <strong class="text-teal-950 font-bold">1일차 객실 고등어회 파티 팁</strong>
+              <span class="text-[10px] bg-teal-100 text-teal-800 font-bold px-1.5 py-0.5 rounded">프라이빗 룸</span>
+            </div>
+            <p class="text-[11px] text-teal-900 leading-snug break-keep">
+              아기가 낮잠 잘 때 성인 4인이 객실 식탁 또는 발코니에서 제주 막걸리/한라산과 함께 여유롭게 신선한 홈메이드 고등어회를 만끽하세요.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- CATEGORY 4: 유모차 무장애 산책로 & 야외 정원 -->
+      <section class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs space-y-3">
+        <div class="flex items-center gap-2 border-b border-slate-100 pb-2.5">
+          <span class="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-bold shrink-0">
+            <i class="fa-solid fa-person-walking-luggage"></i>
+          </span>
+          <div>
+            <h4 class="text-sm font-extrabold text-slate-900 leading-none">유모차 친화 산책로 & 포토존</h4>
+            <p class="text-[11px] text-slate-500 mt-1">턱이 없고 완만한 무장애 힐링 코스</p>
+          </div>
+        </div>
+
+        <div class="space-y-2 text-xs">
+          <div class="p-2.5 rounded-xl border border-emerald-100 bg-emerald-50/50">
+            <strong class="text-emerald-950 font-bold block mb-0.5">1. 표선 해안 데크 산책로 (호텔 정문 연결)</strong>
+            <p class="text-[11px] text-slate-600 leading-snug break-keep">
+              표선 해비치 해변으로 이어지는 나무 데크길은 유모차 바퀴가 부드럽게 굴러가며, 계단 없이 광활한 에메랄드빛 제주 바다를 감상할 수 있습니다.
+            </p>
+          </div>
+
+          <div class="p-2.5 rounded-xl border border-emerald-100 bg-emerald-50/50">
+            <strong class="text-emerald-950 font-bold block mb-0.5">2. 야외 잔디광장 & 팜트리 야경</strong>
+            <p class="text-[11px] text-slate-600 leading-snug break-keep">
+              해질 무렵 야자수 조명이 켜지는 야외 잔디밭에서 이안이 100일 기념 가족 스냅 사진을 찍기에 가장 아름다운 포인트입니다.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- CATEGORY 5: 긴급 연락처 & 편의시설 맵 -->
+      <section class="bg-slate-50 border border-slate-200 rounded-2xl p-4 shadow-xs space-y-2.5">
+        <h4 class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+          <i class="fa-solid fa-bell-concierge text-orange-500"></i> 해비치 주요 직통 내선 번호 안내
+        </h4>
+        <div class="grid grid-cols-2 gap-2 text-[11px]">
+          <div class="bg-white p-2 rounded-lg border border-slate-200">
+            <span class="text-slate-500 block">객실 프론트 데스크</span>
+            <strong class="text-slate-900">내선 '0'번</strong>
+          </div>
+          <div class="bg-white p-2 rounded-lg border border-slate-200">
+            <span class="text-slate-500 block">유아용품/컨시어지</span>
+            <strong class="text-slate-900">내선 8000번</strong>
+          </div>
+          <div class="bg-white p-2 rounded-lg border border-slate-200">
+            <span class="text-slate-500 block">윈터가든 수영장</span>
+            <strong class="text-slate-900">내선 8530번</strong>
+          </div>
+          <div class="bg-white p-2 rounded-lg border border-slate-200">
+            <span class="text-slate-500 block">호텔 내 의무실</span>
+            <strong class="text-slate-900">프론트 문의 (24시간)</strong>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- TAB 3: RECOMMENDATIONS (추천명소 & 맛집) -->
+    <main id="tab-content-recommend" class="flex-1 p-5 space-y-6 hidden">
+      <!-- AI Live Refresh Header Banner -->
+      <div class="bg-gradient-to-r from-emerald-50 via-teal-50 to-sky-50 border border-emerald-200 rounded-2xl p-4 shadow-xs">
+        <div class="flex items-center justify-between gap-2 mb-1.5">
+          <div class="flex items-center gap-2">
+            <span class="p-1.5 bg-emerald-500 text-white rounded-lg text-xs">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </span>
+            <h3 class="font-bold text-slate-800 text-sm">100일 아기 & 4인 맞춤 추천</h3>
+          </div>
+          <button onclick="window.fetchLiveRecommendations()" id="refresh-recommend-btn" class="inline-flex items-center gap-1.5 text-xs font-bold bg-white text-emerald-700 border border-emerald-200 hover:bg-emerald-50 px-2.5 py-1.5 rounded-lg shadow-2xs transition">
+            <i id="refresh-icon" class="fa-solid fa-arrows-rotate"></i>
+            <span>실시간 새로고침</span>
+          </button>
+        </div>
+        <p class="text-xs text-slate-600 leading-relaxed break-keep">
+          유모차 진입이 수월한 완만한 힐링 산책로와 쾌적한 실내 정원, 성인 4인이 편안하게 즐길 수 있는 로컬 맛집입니다.
+        </p>
+        <div id="ai-status-banner" class="mt-2.5 pt-2 border-t border-emerald-100 flex items-center justify-between text-[11px] text-emerald-800 hidden">
+          <span id="ai-status-msg" class="flex items-center gap-1 font-medium"></span>
+          <span id="ai-updated-time" class="text-slate-400"></span>
+        </div>
+      </div>
+
+      <!-- Recommended Spots Section -->
+      <div class="space-y-3">
+        <div class="flex items-center gap-2 border-b border-slate-200 pb-2">
+          <span class="w-6 h-6 bg-emerald-500 text-white rounded-lg flex items-center justify-center font-bold text-xs">
+            <i class="fa-solid fa-tree"></i>
+          </span>
+          <h4 class="font-bold text-slate-800 text-sm">유모차 친화 힐링 명소</h4>
+        </div>
+        <div id="recommend-spots-container" class="space-y-2.5">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+
+      <!-- Recommended Food Section -->
+      <div class="space-y-3 pt-2">
+        <div class="flex items-center gap-2 border-b border-slate-200 pb-2">
+          <span class="w-6 h-6 bg-orange-500 text-white rounded-lg flex items-center justify-center font-bold text-xs">
+            <i class="fa-solid fa-utensils"></i>
+          </span>
+          <h4 class="font-bold text-slate-800 text-sm">제주 로컬 추천 미식</h4>
+        </div>
+        <div id="recommend-foods-container" class="space-y-2.5">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
     </main>
 
     <!-- Modal for Promoting Pending Item to Schedule -->
@@ -417,6 +775,7 @@
     const STORAGE_KEY_CUSTOM_EVENTS = 'jeju_baby_custom_events_v2';
     const STORAGE_KEY_RECOMMENDATIONS = 'jeju_baby_live_recs_v1';
     const STORAGE_KEY_LIVETIP = 'jeju_baby_live_tip_v1';
+    const STORAGE_KEY_HAEVICHI_TIP = 'jeju_baby_haevichi_tip_v1';
     const STORAGE_KEY_PENDING_SCHEDULES = 'jeju_baby_pending_schedules_v2';
 
     // Default Pending/TBD Schedule Items
@@ -763,6 +1122,7 @@
       // Tips & Recommendations
       loadSavedRecommendations();
       loadSavedTip();
+      loadSavedHaevichiTip();
     }
 
     // --- PENDING / TBD SCHEDULES LOGIC ---
@@ -917,7 +1277,7 @@
 
     // --- TAB SWITCHING ---
     function switchTab(tabName) {
-      const tabs = ['plan', 'checklist', 'recommend'];
+      const tabs = ['plan', 'checklist', 'haevichi', 'recommend'];
       tabs.forEach(tab => {
         const btn = document.getElementById(`tab-btn-${tab}`);
         const content = document.getElementById(`tab-content-${tab}`);
@@ -947,6 +1307,79 @@
     ];
     let currentTipIndex = 0;
     let isFetchingTip = false;
+
+    // --- REALTIME HAEVICHI HOTEL TIPS ---
+    const haevichiTipPool = [
+      "해비치 1층 '마고' 베이커리는 오후 5시 이후 시그니처 롤케이크가 빠르게 마감될 수 있습니다. 체크인 직후 들러 포장해 두시면 저녁 객실 티타임에 달콤하게 즐기실 수 있습니다.",
+      "윈터가든 실내 온수풀은 12:00~14:00 시간대가 체크아웃과 체크인 사이라 가장 한산합니다. 100일 아기와 첫 물놀이 시 이 시간대를 이용하면 여유롭습니다.",
+      "리조트 지하 1층 CU 편의점에는 전자레인지 2대와 온수기가 완비되어 있어, 젖병 세척용 온수 보충이나 수유 전 분유 온도를 맞추기에 매우 유용합니다.",
+      "호텔 중앙 글라스 아뜨리움은 저녁 7시 이후 은은한 라이브 피아노 연주가 진행됩니다. 유모차를 밀며 넓은 로비 라운지를 산책하기만 해도 큰 힐링이 됩니다.",
+      "해비치에서 표선 해안으로 이어지는 산책 데크길은 일출 포인트로도 유명합니다. 아침 이른 시간 성인 2명씩 교대로 교대 산책을 다녀오시면 상쾌한 아침을 맞이할 수 있습니다.",
+      "아기 원목침대와 가습기, 젖병소독기는 한정 수량이므로 객실 입실 즉시 내선 '0'번(프론트) 또는 '8000'번(컨시어지)으로 설치 상태를 한 번 더 체크하세요.",
+      "실내 수영장 이용 후 아기 체온이 급격히 떨어질 수 있으니, 유아용 목욕 가운이나 도톰한 비치타월을 윈터가든 리셉션에서 넉넉히 받아 객실로 이동하세요."
+    ];
+    let currentHaevichiTipIndex = 0;
+    let isFetchingHaevichiTip = false;
+
+    function loadSavedHaevichiTip() {
+      const saved = localStorage.getItem(STORAGE_KEY_HAEVICHI_TIP);
+      if (saved) {
+        const el = document.getElementById('haevichi-live-tip');
+        if (el) el.textContent = saved;
+      }
+    }
+
+    async function fetchLiveHaevichiTip() {
+      if (isFetchingHaevichiTip) return;
+      isFetchingHaevichiTip = true;
+
+      const icon = document.getElementById('haevichi-tip-refresh-icon');
+      const textEl = document.getElementById('haevichi-live-tip');
+      if (icon) icon.classList.add('fa-spin');
+
+      const prompt = `
+당신은 제주 서귀포 표선 '해비치 호텔 & 리조트' 전문 컨시어지 매니저입니다.
+투숙객: 성인 4명 + 100일 된 아기 1명 (유모차 필수).
+11월 초 여행 환경에서 해비치 호텔의 실내 윈터가든 온수풀 수영 팁, 마고 베이커리/이디 라운지 이용법, 아뜨리움 라이브 연주 관람, 무장애 산책로, 아기용품 대여 및 편의시설(전자레인지, 편의점) 활용 등 실전 호캉스 꿀팁을 한국어로 작성해 주세요.
+조건:
+1. 문장은 2문장 내외 (80자~120자 내외)로 자연스럽고 친절하게 작성하세요.
+2. 따옴표나 서두 인사 없이 팁 본문 텍스트만 바로 출력하세요.
+`;
+
+      const apiKey = "";
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }]
+          })
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        const tipText = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+
+        if (tipText) {
+          textEl.textContent = tipText;
+          localStorage.setItem(STORAGE_KEY_HAEVICHI_TIP, tipText);
+          showToast('새로운 해비치 호캉스 팁을 불러왔습니다!');
+        } else {
+          throw new Error('Empty tip');
+        }
+      } catch (err) {
+        currentHaevichiTipIndex = (currentHaevichiTipIndex + 1) % haevichiTipPool.length;
+        const fallbackTip = haevichiTipPool[currentHaevichiTipIndex];
+        textEl.textContent = fallbackTip;
+        localStorage.setItem(STORAGE_KEY_HAEVICHI_TIP, fallbackTip);
+        showToast('새로운 해비치 호캉스 팁으로 갱신되었습니다!');
+      } finally {
+        isFetchingHaevichiTip = false;
+        if (icon) icon.classList.remove('fa-spin');
+      }
+    }
 
     function loadSavedTip() {
       const saved = localStorage.getItem(STORAGE_KEY_LIVETIP);
@@ -1529,6 +1962,7 @@
     window.addPendingItem = addPendingItem;
     window.deletePendingItem = deletePendingItem;
     window.fetchLiveTip = fetchLiveTip;
+    window.fetchLiveHaevichiTip = fetchLiveHaevichiTip;
     window.fetchLiveRecommendations = fetchLiveRecommendations;
     window.sharePlan = sharePlan;
 
