@@ -58,32 +58,31 @@
 <body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col items-center">
 
   <!-- Main Container (App-like layout max-w-md on mobile, expands smoothly) -->
-  <div class="w-full max-w-xl bg-white min-h-screen shadow-xl flex flex-col relative pb-20">
+  <div class="w-full max-w-xl bg-white min-h-screen shadow-xl flex flex-col relative pb-8">
     
     <!-- Top Header -->
-    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 px-5 py-4 flex items-center justify-between">
-      <div class="flex items-center space-x-2">
-        <span class="p-2 bg-orange-100 text-orange-600 rounded-xl text-lg">
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 px-5 py-3.5 flex items-center justify-between">
+      <div class="flex items-center space-x-2.5">
+        <span class="p-2 bg-orange-100 text-orange-600 rounded-xl text-lg shrink-0">
           <i class="fa-solid fa-umbrella-beach"></i>
         </span>
         <div>
           <h1 class="text-lg font-extrabold text-slate-900 tracking-tight flex items-center gap-1.5">
             이안이와 함께하는 제주 힐링 트립 
           </h1>
-          <div class="flex items-center gap-2 mt-0.5">
-            <p class="text-xs text-slate-500">2026.11.02(월) ~ 11.04(수) · 해비치 호텔</p>
-            <span id="sync-status-badge" class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-              <span id="sync-status-text">동기화 연결 중</span>
-            </span>
+          <div class="space-y-0.5 mt-0.5">
+            <p class="text-xs font-medium text-slate-600">2026.11.02(월) ~ 11.04(수)</p>
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-orange-600 font-semibold flex items-center gap-1">
+                <i class="fa-solid fa-hotel text-[10px]"></i> 해비치 호텔 & 리조트
+              </span>
+              <span id="sync-status-badge" class="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                <span id="sync-status-text">동기화 연결 중</span>
+              </span>
+            </div>
           </div>
         </div>
-      </div>
-      <!-- D-day & Quick Info -->
-      <div class="text-right">
-        <span class="text-xs px-2.5 py-1 bg-sky-50 text-sky-600 rounded-lg font-bold border border-sky-100">
-          2박 3일
-        </span>
       </div>
     </header>
 
@@ -556,6 +555,7 @@
                 <option value="PM" selected>오후</option>
               </select>
               <select id="modal-time-hour" class="w-1/3 border border-slate-200 rounded-xl p-2.5 bg-white font-medium">
+                <!-- 1 ~ 12 options populated via JS or static -->
                 <option value="01">1시</option>
                 <option value="02">2시</option>
                 <option value="03">3시</option>
@@ -588,33 +588,14 @@
             <textarea id="modal-desc" rows="2" placeholder="메모 입력" class="w-full border border-slate-200 rounded-xl p-2.5 outline-none focus:border-orange-500 resize-none"></textarea>
           </div>
           <div>
-            <div class="flex items-center justify-between mb-1">
-              <label class="block font-semibold text-slate-700">장소명 또는 네이버 지도 링크 (선택)</label>
-              <span class="text-[10px] text-emerald-600 font-medium">단축링크(naver.me) 붙여넣기 지원</span>
-            </div>
-            <input type="text" id="modal-query" placeholder="장소명 입력 또는 네이버 지도 공유 링크 복사 붙여넣기" class="w-full border border-slate-200 rounded-xl p-2.5 outline-none focus:border-orange-500">
+            <label class="block font-semibold text-slate-700 mb-1">네이버 지도 링크 검색어 (선택)</label>
+            <input type="text" id="modal-query" placeholder="장소명 입력" class="w-full border border-slate-200 rounded-xl p-2.5 outline-none focus:border-orange-500">
           </div>
         </div>
         <div class="flex gap-2 pt-1">
           <button onclick="closeAddModal()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition">취소</button>
           <button onclick="saveNewSchedule()" class="flex-1 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-xs transition">추가</button>
         </div>
-      </div>
-    </div>
-
-    <!-- Fixed Bottom Bar -->
-    <div class="fixed bottom-0 max-w-xl w-full bg-white/95 backdrop-blur border-t border-slate-200 px-5 py-3 flex items-center justify-between text-xs z-30">
-      <div class="flex items-center gap-2">
-        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        <span class="text-slate-600 font-medium">제주 가족 여행 가이드 · 4인 실시간 공유</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <button onclick="sharePlan()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg flex items-center gap-1 transition">
-          <i class="fa-solid fa-arrow-up-from-bracket"></i> 공유
-        </button>
-        <button onclick="window.scrollTo({top:0, behavior:'smooth'})" class="p-1.5 text-slate-400 hover:text-slate-700">
-          <i class="fa-solid fa-chevron-up"></i>
-        </button>
       </div>
     </div>
 
@@ -717,62 +698,6 @@
     let checklistData = [];
     let customEvents = [];
 
-    // Helper: Build resilient Naver Map URL & App Deep Link
-    function resolveNaverMapTarget(queryOrUrl) {
-      if (!queryOrUrl) return null;
-      const trimmed = queryOrUrl.trim();
-      if (!trimmed) return null;
-
-      // Case 1: Directly provided naver map link (e.g., https://naver.me/xxx or https://map.naver.com/...)
-      if (/^https?:\/\//i.test(trimmed)) {
-        return {
-          type: 'direct',
-          webUrl: trimmed,
-          appUrl: null
-        };
-      }
-
-      // Case 2: Keyword search with mobile web fallback and native app protocol
-      const encoded = encodeURIComponent(trimmed);
-      return {
-        type: 'query',
-        query: trimmed,
-        // Using stable mobile search URL that avoids blockages
-        webUrl: `https://m.map.naver.com/search2/search.naver?query=${encoded}`,
-        // Naver Map App URL Scheme
-        appScheme: `nmap://search?query=${encoded}&appname=jeju.ian.trip`
-      };
-    }
-
-    // Global launcher for opening Naver Map reliably without webview block
-    function openNaverMap(queryOrUrl) {
-      const target = resolveNaverMapTarget(queryOrUrl);
-      if (!target) return;
-
-      if (target.type === 'direct') {
-        window.open(target.webUrl, '_blank', 'noopener,noreferrer');
-        return;
-      }
-
-      // Check if user is on mobile
-      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-      if (isMobile && target.appScheme) {
-        const start = Date.now();
-        // Attempt opening naver map native app
-        window.location.href = target.appScheme;
-
-        // Fallback to mobile web map if app is not opened
-        setTimeout(() => {
-          if (Date.now() - start < 1500) {
-            window.open(target.webUrl, '_blank', 'noopener,noreferrer');
-          }
-        }, 800);
-      } else {
-        // Desktop or standard browser
-        window.open(target.webUrl, '_blank', 'noopener,noreferrer');
-      }
-    }
-
     // Base Fixed Schedules
     const baseSchedules = [
       // Day 1
@@ -794,7 +719,7 @@
         sortTime: '10:00',
         title: '패밀리 렌트카 차량 인수',
         mapTitle: '네이버 지도',
-        mapQuery: '제주 패밀리렌트카',
+        mapUrl: 'https://map.naver.com/p/search/제주%20패밀리렌트카',
         specialHtml: `
           <div class="mt-2.5 bg-white border border-blue-200 p-2.5 rounded-lg flex items-start gap-2 text-xs">
             <i class="fa-solid fa-bus text-blue-600 mt-0.5"></i>
@@ -817,7 +742,7 @@
         title: "제과점 '도라지' 방문",
         tag: '지인 방문',
         mapTitle: '네이버 지도',
-        mapQuery: '제주시 도라지',
+        mapUrl: 'https://map.naver.com/p/search/제주시%20도라지',
         desc: '지인 제과점 축하 인사 & 디저트/빵 포장 (티타임 및 간식용)',
         bulletColor: 'bg-amber-500',
         timeBadgeClass: 'text-amber-700 bg-amber-100',
@@ -830,7 +755,7 @@
         sortTime: '12:30',
         title: '고등어회 직접 만들어 먹기 (홈메이드/프라이빗)',
         mapTitle: '수산시장 지도',
-        mapQuery: '제주 동문재래시장 수산시장',
+        mapUrl: 'https://map.naver.com/p/search/제주시%20동문시장%20수산시장',
         desc: '식당 방문 없이 신선한 제철 활고등어 원물을 수산시장(동문시장 또는 제주시 수협공판장)에서 포장하여 숙소/프라이빗 공간에서 직접 손질해 즐기는 특별한 고등어회 파티!',
         specialHtml: `
           <div class="mt-2 text-[11px] text-teal-900 bg-white/80 p-2 rounded-lg leading-relaxed">
@@ -848,7 +773,7 @@
         sortTime: '15:00',
         title: '해비치 호텔 & 리조트 체크인 & 아기 휴식',
         mapTitle: '네이버 지도',
-        mapQuery: '해비치호텔앤드리조트 제주',
+        mapUrl: 'https://map.naver.com/p/search/해비치호텔앤드리조트%20제주',
         desc: '객실 내 대여 용품(아기침대, 젖병소독기, 아기욕조) 세팅 점검 및 수유/낮잠 시간 (제주시→표선 이동 약 50분)',
         bulletColor: 'bg-slate-400',
         timeBadgeClass: 'text-slate-600 bg-slate-100',
@@ -864,7 +789,7 @@
         title: "식당 '로티 (Roti)' 방문",
         tag: '지인 방문',
         mapTitle: '네이버 지도',
-        mapQuery: '제주 로티',
+        mapUrl: 'https://map.naver.com/p/search/제주%20로티',
         desc: "지인이 정성껏 운영하는 분위기 좋은 식당에서 프라이빗하고 편안한 오찬 식사 (표선 해비치→송당 이동 약 25분)",
         bulletColor: 'bg-sky-600',
         timeBadgeClass: 'text-amber-800 bg-amber-100',
@@ -877,7 +802,7 @@
         sortTime: '15:30',
         title: '해비치 윈터가든 실내 온수풀 수영',
         mapTitle: '네이버 지도',
-        mapQuery: '해비치호텔 윈터가든',
+        mapUrl: 'https://map.naver.com/p/search/해비치호텔%20윈터가든',
         desc: '이안이를 위한 방수기저귀 착용 온수풀 물놀이 & 성인 스파 힐링',
         bulletColor: 'bg-sky-600',
         timeBadgeClass: 'text-sky-800 bg-sky-100',
@@ -903,7 +828,7 @@
         sortTime: '15:00',
         title: '패밀리 렌트카 차량 반납',
         mapTitle: '네이버 지도',
-        mapQuery: '제주 패밀리렌트카',
+        mapUrl: 'https://map.naver.com/p/search/제주%20패밀리렌트카',
         desc: '표선→공항 차고지 이동(약 50분). 연료 체크 후 반납, 셔틀 탑승하여 공항 이동',
         bulletColor: 'bg-emerald-600',
         timeBadgeClass: 'text-slate-600 bg-slate-100',
@@ -916,7 +841,7 @@
         sortTime: '15:30',
         title: '제주공항 수속 (16:30 출발 ✈ 17:30 김포 도착)',
         mapTitle: '네이버 지도',
-        mapQuery: '제주국제공항',
+        mapUrl: 'https://map.naver.com/p/search/제주국제공항',
         desc: '유아 동반 교통약자 우대통로(패스트트랙) 이용, 공항 수유실 기저귀 갈이 및 탑승',
         bulletColor: 'bg-orange-500',
         timeBadgeClass: 'text-orange-800 bg-orange-100',
@@ -1099,9 +1024,9 @@
             </div>
           </label>
           <div class="flex items-center gap-1 shrink-0">
-            <button onclick="window.openNaverMap('${mapQuery.replace(/'/g, "\\'")}')" class="inline-flex items-center gap-1 text-[10px] font-semibold bg-[#03C75A] text-white hover:bg-emerald-600 px-2 py-1 rounded-md shadow-2xs transition" title="네이버 지도에서 보기">
+            <a href="https://map.naver.com/p/search/${encodeURIComponent(mapQuery)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[10px] font-semibold bg-[#03C75A] text-white hover:bg-emerald-600 px-2 py-1 rounded-md shadow-2xs transition" title="네이버 지도에서 보기">
               <i class="fa-solid fa-map-pin"></i> 지도
-            </button>
+            </a>
             <button onclick="window.deletePendingItem('${item.id}')" class="text-slate-300 hover:text-rose-500 p-1 text-xs" title="삭제">
               <i class="fa-solid fa-xmark"></i>
             </button>
@@ -1366,11 +1291,10 @@
 
           if (!isCustom) {
             // Base schedule card rendering
-            const mapTarget = item.mapQuery || item.mapUrl;
-            const mapBtn = mapTarget ? `
-              <button onclick="window.openNaverMap('${mapTarget.replace(/'/g, "\\'")}')" class="inline-flex items-center gap-1 text-[11px] font-semibold bg-[#03C75A] text-white hover:bg-emerald-600 px-2.5 py-1 rounded-md shadow-xs transition">
+            const mapBtn = item.mapUrl ? `
+              <a href="${item.mapUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-semibold bg-[#03C75A] text-white hover:bg-emerald-600 px-2.5 py-1 rounded-md shadow-xs transition">
                 <i class="fa-solid fa-${item.id === 'base_1_4' ? 'basket-shopping' : (item.id.includes('렌트카') ? 'map-location-dot' : 'map-pin')}"></i> ${item.mapTitle || '지도'}
-              </button>
+              </a>
             ` : '';
 
             const tagBadge = item.tag ? `<span class="text-[10px] font-bold px-1.5 py-0.5 bg-rose-500 text-white rounded">${item.tag}</span>` : '';
@@ -1395,9 +1319,9 @@
           } else {
             // User added custom schedule card rendering
             const mapBtn = item.query ? `
-              <button onclick="window.openNaverMap('${item.query.replace(/'/g, "\\'")}')" class="inline-flex items-center gap-1 text-[11px] font-semibold bg-[#03C75A] text-white hover:bg-emerald-600 px-2.5 py-1 rounded-md shadow-xs">
+              <a href="https://map.naver.com/p/search/${encodeURIComponent(item.query)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-semibold bg-[#03C75A] text-white hover:bg-emerald-600 px-2.5 py-1 rounded-md shadow-xs">
                 <i class="fa-solid fa-map-pin"></i> 네이버 지도
-              </button>
+              </a>
             ` : '';
 
             row.innerHTML = `
@@ -1685,16 +1609,15 @@
         data.spots.forEach(spot => {
           const card = document.createElement('div');
           card.className = 'bg-white border border-slate-200 p-3.5 rounded-xl shadow-xs transition hover:border-emerald-300';
-          const target = spot.query || spot.title;
           card.innerHTML = `
             <div class="flex justify-between items-start">
               <div>
                 <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">${spot.tag || '추천 명소'}</span>
                 <h5 class="font-bold text-slate-900 text-sm mt-1">${spot.title}</h5>
               </div>
-              <button onclick="window.openNaverMap('${target.replace(/'/g, "\\'")}')" class="inline-flex items-center gap-1 text-[11px] font-semibold bg-[#03C75A] text-white hover:bg-emerald-600 px-2.5 py-1 rounded-md shadow-xs">
+              <a href="https://map.naver.com/p/search/${encodeURIComponent(spot.query || spot.title)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-semibold bg-[#03C75A] text-white hover:bg-emerald-600 px-2.5 py-1 rounded-md shadow-xs">
                 <i class="fa-solid fa-map-pin"></i> 지도
-              </button>
+              </a>
             </div>
             <p class="text-xs text-slate-600 mt-1">${spot.desc}</p>
           `;
@@ -1707,16 +1630,15 @@
         data.foods.forEach(food => {
           const card = document.createElement('div');
           card.className = 'bg-white border border-slate-200 p-3.5 rounded-xl shadow-xs transition hover:border-orange-300';
-          const target = food.query || food.title;
           card.innerHTML = `
             <div class="flex justify-between items-start">
               <div>
                 <span class="text-[10px] font-bold text-orange-700 bg-orange-50 px-2 py-0.5 rounded">${food.tag || '추천 미식'}</span>
                 <h5 class="font-bold text-slate-900 text-sm mt-1">${food.title}</h5>
               </div>
-              <button onclick="window.openNaverMap('${target.replace(/'/g, "\\'")}')" class="inline-flex items-center gap-1 text-[11px] font-semibold bg-[#03C75A] text-white hover:bg-emerald-600 px-2.5 py-1 rounded-md shadow-xs">
+              <a href="https://map.naver.com/p/search/${encodeURIComponent(food.query || food.title)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] font-semibold bg-[#03C75A] text-white hover:bg-emerald-600 px-2.5 py-1 rounded-md shadow-xs">
                 <i class="fa-solid fa-map-pin"></i> 지도
-              </button>
+              </a>
             </div>
             <p class="text-xs text-slate-600 mt-1">${food.desc}</p>
           `;
@@ -1765,7 +1687,6 @@
     window.fetchLiveTip = fetchLiveTip;
     window.fetchLiveRecommendations = fetchLiveRecommendations;
     window.sharePlan = sharePlan;
-    window.openNaverMap = openNaverMap;
 
     // Run initialization
     initFirebaseAndState();
